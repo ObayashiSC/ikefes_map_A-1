@@ -272,12 +272,22 @@
 	  #toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 	
 	  .modal-backdrop{
-	    position:absolute; inset:0;
-	    background:rgba(0,0,0,.45);
-	    z-index:3000;
-	    display:none; align-items:center; justify-content:center;
-	    backdrop-filter:blur(3px);
-	    padding:20px;
+	   
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+
+  background:rgba(0,0,0,.45);
+
+  z-index:99999;
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  backdrop-filter:blur(3px
+
 	  }
 	  .modal-backdrop.show{display:flex;}
 	  .modal{
@@ -717,7 +727,7 @@
 			}
 			const btn = document.getElementById('locateBtn');
 			btn.classList.add('active', 'loading');
-			btn.querySelector('svg').innerHTML = '<use href="#i-spinner"/>';
+			//btn.querySelector('svg').innerHTML = '<use href="#i-spinner"/>';
 
 			return new Promise((resolve, reject) => {
 				navigator.geolocation.getCurrentPosition(pos => {
