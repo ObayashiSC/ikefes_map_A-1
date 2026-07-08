@@ -739,12 +739,6 @@
 							animate: true
 						});
 					}
-
-					if (recenter) {
-						map.setView(ll, Math.max(map.getZoom(), 15), {
-							animate: true
-						});
-					}
 					btn.classList.remove('loading');
 					btn.querySelector('svg').innerHTML = '<use href="#i-locate"/>';
 					setTimeout(() => btn.classList.remove('active'), 1200);
