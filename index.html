@@ -735,7 +735,6 @@
 					if (guide) {
 						guide.style.display = 'none';
 					}
-						openSettingModal();
 					if (recenter) {
 						map.setView(ll, Math.max(map.getZoom(), 15), {
 							animate: true
@@ -881,8 +880,6 @@
 
 　　document.getElementById('settingCancel')
   .addEventListener('click', closeSettingModal);
-});
-
 		document.getElementById('settingGo').addEventListener('click', () => {
 			window.open(
 				'https://drop.machiapps.com/nakanoshima/location-permissions/',
