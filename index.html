@@ -369,6 +369,14 @@
 	  text-decoration:underline;
 	  font-weight:500;
 	}
+	
+　　/* PCでは白帯を表示しない */
+　　@media (min-width:768px){
+  　.location-guide{
+    display:none !important;
+  }
+
+	
 	</style>
 </head>
 
@@ -864,6 +872,10 @@
 			});
 
 		function openSettingModal() {
+			
+         // PCなら表示しない
+          if (window.innerWidth >= 768) return;
+
 			const m = document.getElementById('settingModal');
 			if (!m) return;
 			m.classList.add('show');
