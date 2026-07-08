@@ -731,7 +731,7 @@
 					if (guide) {
 						guide.style.display = 'none';
 					}
-
+						openSettingModal();
 					if (recenter) {
 						map.setView(ll, Math.max(map.getZoom(), 15), {
 							animate: true
@@ -752,6 +752,7 @@
 						if (guide) {
 							guide.style.display = 'block';
 						}
+					　openSettingModal();	
 					}
 					if (!silent) {
 						if (err && err.code === 1) {
@@ -946,7 +947,8 @@
 							if (guide) {
 								guide.style.display = 'block';
 							}
-
+							
+　　　　　　　　　　　　　　openSettingModal();
 						} else {
 
 							state.userDenied = false;
