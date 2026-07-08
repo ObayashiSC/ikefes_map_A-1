@@ -426,10 +426,9 @@
 
 		<div id="locationGuide" class="location-guide" style="display:none;">
 			📍現在地が表示されない場合は
-			
-<a href="https://drop.machiapps.com/nakanoshima/location-permissions/"
-     target="_blank"
-     rel="noopener noreferrer">
+
+			<a href="https://drop.machiapps.com/nakanoshima/location-permissions/" target="_blank"
+			rel="noopener noreferrer">
 
     設定方法はこちら
   </a>
@@ -754,8 +753,8 @@
 						const guide = document.getElementById('locationGuide');
 						if (guide) {
 							guide.style.display = 'block';
-						}
-					　openSettingModal();	
+						}　
+						openSettingModal();
 					}
 					if (!silent) {
 						if (err && err.code === 1) {
@@ -876,10 +875,11 @@
 			m.classList.remove('show');
 			m.setAttribute('aria-hidden', 'true');
 		}
-		
 
-　　document.getElementById('settingCancel')
-  .addEventListener('click', closeSettingModal);
+
+		　　
+		document.getElementById('settingCancel')
+			.addEventListener('click', closeSettingModal);
 		document.getElementById('settingGo').addEventListener('click', () => {
 			window.open(
 				'https://drop.machiapps.com/nakanoshima/location-permissions/',
@@ -927,8 +927,8 @@
 
 						if (guide) {
 							guide.style.display = 'block';
-						}
-					　openSettingModal();
+						}　
+						openSettingModal();
 					} else {
 
 						state.userDenied = false;
@@ -952,8 +952,9 @@
 							if (guide) {
 								guide.style.display = 'block';
 							}
-							
-　　　　　　　　　　　　　　openSettingModal();
+
+							　　　　　　　　　　　　　　
+							openSettingModal();
 						} else {
 
 							state.userDenied = false;
