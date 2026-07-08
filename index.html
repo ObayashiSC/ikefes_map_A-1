@@ -54,10 +54,14 @@
   }
   button{font-family:inherit; color:inherit;}
 
-  #app{
-    display:grid; grid-template-rows:auto 1fr; height:100dvh;
-    position:relative; padding-top:var(--safe-top);
-  }
+ 
+#app{
+  display:grid;
+  grid-template-rows:auto auto 1fr;
+  height:100dvh;
+  position:relative;
+  padding-top:var(--safe-top);
+}
 
   header{
     background:var(--bg);
@@ -100,7 +104,7 @@
 
   #panel{
     position:absolute; left:0; right:auto; bottom:0;
-    top:calc(61px + var(--safe-top));
+    top:calc(95px + var(--safe-top));
     width:340px; max-width:88%;
     background:var(--bg);
     border-right:1px solid var(--line);
@@ -317,7 +321,7 @@
   }
 
   #overlay{
-    position:absolute; inset:calc(61px + var(--safe-top)) 0 0 0;
+    position:absolute; inset:calc(95px + var(--safe-top)) 0 0 0;
     background:rgba(0,0,0,.35); z-index:1040;
     opacity:0; pointer-events:none; transition:opacity .25s ease;
     backdrop-filter:blur(2px);
@@ -339,6 +343,21 @@
     .icon-btn{min-width:44px; min-height:44px;}
     .cat-item{padding:14px;}
   }
+  .location-guide{
+  background:#ffffff;
+  border-bottom:1px solid var(--line);
+  text-align:center;
+  padding:8px 12px;
+  font-size:12px;
+  line-height:1.5;
+  z-index:1200;
+}
+
+.location-guide a{
+  color:#0066cc;
+  text-decoration:underline;
+  font-weight:500;
+}
 </style>
 </head>
 <body>
@@ -390,6 +409,16 @@
 </svg>
 
 <div id="app">
+  
+
+<div id="locationGuide" class="location-guide" style="display:none;">
+  📍現在地が表示されない場合は
+  <a href="" target="_blank" rel="noopener noreferrer">
+    設定方法はこちら
+  </a>
+</div>
+
+
   <header>
     <div class="brand">
       <svg class="mark"><use href="#i-logo"/></svg>
@@ -639,7 +668,15 @@
       }, err=>{
         btn.classList.remove('active','loading');
         btn.querySelector('svg').innerHTML = '<use href="#i-locate"/>';
-        if (err && err.code === 1) state.userDenied = true;
+
+        if (err && err.code === 1) {
+        state.userDenied = true;
+
+        const guide = document.getElementById('locationGuide');
+        if (guide) {
+        guide.style.display = 'block';
+        }
+      }
         if (!silent){
           if (err && err.code === 1){
             openSettingModal();
@@ -765,24 +802,110 @@
     }).catch(()=>{});
   }
 
-  function initGeoByPermission(){
-    if (!navigator.geolocation) return;
-    if (navigator.permissions && navigator.permissions.query){
-      navigator.permissions.query({name:'geolocation'}).then(res=>{
-        state.geoPermission = res.state;
-        if (res.state === 'granted' || res.state === 'prompt'){
-          tryAutoLocate();
-        }
-        res.onchange = ()=>{
-          state.geoPermission = res.state;
-          if (res.state === 'denied') state.userDenied = true;
-        };
-      }).catch(()=>{ tryAutoLocate(); });
-    } else {
-      tryAutoLocate();
-    }
-  }
+  
+function initGeoByPermission(){
+  if (!navigator.geolocation) return;
 
+  if (navigator.permissions && navigator.permissions.query){
+
+    navigator.permissions.query({name:'geolocation'}).then(res=>{
+
+      state.geoPermission = res.state;
+
+      const guide = document.getElementById('locationGuide');
+
+      // 初回表示時
+      if (res.state === 'denied') {
+
+        state.userDenied = true;
+
+        if (guide) {
+          guide.style.display = 'block';
+        }
+
+      } else {
+
+        state.userDenied = false;
+
+        if (guide) {
+          guide.style.display = 'none';
+        }
+
+        tryAutoLocate();
+      }
+
+      // 権限変更監視
+      res.onchange = ()=>{
+
+        state.geoPermission = res.state;
+
+        if (res.state === 'denied') {
+
+          state.userDenied = true;
+
+          if (guide) {
+            guide.style.display = 'block';
+          }
+
+        } else {
+
+          state.userDenied = false;
+
+          if (guide) {
+            guide.style.display = 'none';
+          }
+
+          locate({
+            silent:true,
+            recenter:false
+          }).catch(()=>{});
+        }
+      };
+
+    }).catch(()=>{
+      tryAutoLocate();
+    });
+
+  } else {
+    tryAutoLocate();
+  }
+}
+
+ocument.addEventListener('visibilitychange', ()=>{
+
+  if (document.visibilityState !== 'visible') return;
+
+  if (!navigator.permissions || !navigator.permissions.query) return;
+
+  navigator.permissions.query({name:'geolocation'}).then(res=>{
+
+    state.geoPermission = res.state;
+
+    const guide = document.getElementById('locationGuide');
+
+    if (res.state === 'denied') {
+
+      state.userDenied = true;
+
+      if (guide) {
+        guide.style.display = 'block';
+      }
+
+    } else {
+
+      state.userDenied = false;
+
+      if (guide) {
+        guide.style.display = 'none';
+      }
+
+      locate({
+        silent:true,
+        recenter:false
+      }).catch(()=>{});
+    }
+
+  }).catch(()=>{});
 })();
 </script>
 </body>
