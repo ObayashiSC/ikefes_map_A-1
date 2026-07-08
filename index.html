@@ -789,10 +789,6 @@
 		}
 
 		document.getElementById('locateBtn').addEventListener('click', () => {
-			if (!navigator.geolocation || state.geoPermission === 'denied' || state.userDenied) {
-				openSettingModal();
-				return;
-			}
 			locate();
 		});
 		document.getElementById('toggleFilter').addEventListener('click', () =>
