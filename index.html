@@ -878,17 +878,9 @@
 			m.setAttribute('aria-hidden', 'true');
 		}
 		
-document.getElementById('settingCancel')
-  .addEventListener('click', ()=>{
 
-    const guide = document.getElementById('locationGuide');
-
-    if (guide) {
-      guide.style.display = 'block';
-    }
-
-    closeSettingModal();
-
+　　document.getElementById('settingCancel')
+  .addEventListener('click', closeSettingModal);
 });
 
 		document.getElementById('settingGo').addEventListener('click', () => {
