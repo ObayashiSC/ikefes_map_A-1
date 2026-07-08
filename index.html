@@ -744,9 +744,7 @@
 					setTimeout(() => btn.classList.remove('active'), 1200);
 					resolve(ll);
 				}, err => {
-					btn.classList.remove('active', 'loading');
-					btn.querySelector('svg').innerHTML = '<use href="#i-locate"/>';
-
+					btn.classList.remove('active');
 					if (err && err.code === 1) {
 						state.userDenied = true;
 
