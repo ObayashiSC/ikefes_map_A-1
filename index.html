@@ -428,8 +428,7 @@
 			マップ上に現在地が表示されない場合、スマートフォンの位置情報設定をご確認ください。設定方法は
 			<a href="https://drop.machiapps.com/nakanoshima/location-permissions/" target="_blank"
 			rel="noopener noreferrer">こちら
-			</a>
-			をご覧ください。
+			</a> をご覧ください。
 		</div>
 
 
@@ -976,15 +975,28 @@
 		document.addEventListener('visibilitychange', () => {
 
 			if (document.visibilityState !== 'visible') return;
-			
-           
- setTimeout(()=>{
-    locate({
-      silent:true,
-      recenter:false
-    }).catch(()=>{});
-  }, 500);
 
+
+			setTimeout(() => {
+				locate({
+					silent: true,
+					recenter: false
+				}).catch(() => {});
+			}, 500);
+
+			setTimeout(() => {
+				locate({
+					silent: true,
+					recenter: false
+				}).catch(() => {});
+			}, 1500);
+
+			setTimeout(() => {
+				locate({
+					silent: true,
+					recenter: false
+				}).catch(() => {});
+			}, 3000);
 
 
 			if (!navigator.permissions || !navigator.permissions.query) return;
