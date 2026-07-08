@@ -728,15 +728,17 @@
 						acc = pos.coords.accuracy;
 					const ll = [lat, lng];
 					setMeMarker(ll, acc);
-					
-const guide = document.getElementById('locationGuide');
-if (guide) {
-  guide.style.display = 'none';
-}
 
-if (recenter){
-  map.setView(ll, Math.max(map.getZoom(), 15), {animate:true});
-}
+					const guide = document.getElementById('locationGuide');
+					if (guide) {
+						guide.style.display = 'none';
+					}
+
+					if (recenter) {
+						map.setView(ll, Math.max(map.getZoom(), 15), {
+							animate: true
+						});
+					}
 
 					if (recenter) {
 						map.setView(ll, Math.max(map.getZoom(), 15), {
