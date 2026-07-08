@@ -364,9 +364,8 @@
 　　@media (min-width:768px){
   　.location-guide{
     display:none !important;
+   }
   }
-
-	
 	</style>
 </head>
 
@@ -742,8 +741,6 @@
 							animate: true
 						});
 					}
-					btn.classList.remove('loading');
-					btn.querySelector('svg').innerHTML = '<use href="#i-locate"/>';
 					setTimeout(() => btn.classList.remove('active'), 1200);
 					resolve(ll);
 				}, err => {
