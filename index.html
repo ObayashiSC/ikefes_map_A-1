@@ -746,7 +746,7 @@ header{
 
     const guide = document.getElementById('locationGuide');
 
-    if (guide && !state.userDenied) {
+    if (guide && state.geoPermission === 'granted') {
         guide.style.display = 'none';
 
         requestAnimationFrame(() => {
@@ -950,7 +950,7 @@ header{
 
 						state.userDenied = false;
 
-						if (guide && !state.userDenied) {
+						if (guide && state.geoPermission === 'granted') {
 							guide.style.display = 'none';
 							requestAnimationFrame(() => {
 								map.invalidateSize();
@@ -982,7 +982,7 @@ header{
 
 							state.userDenied = false;
 
-							if (guide && !state.userDenied) {
+							if (guide && state.geoPermission === 'granted') {
 								guide.style.display = 'none';
 
 
@@ -1057,7 +1057,7 @@ header{
 
 					state.userDenied = false;
 
-					if (guide && !state.userDenied) {
+					if (guide && state.geoPermission === 'granted') {
 						guide.style.display = 'none';
 					}
 
