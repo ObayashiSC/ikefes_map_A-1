@@ -593,10 +593,13 @@ position:relative;
 			function popupHtml(poi) {
 				const cat = poi.category || {};
 				const color = cat.color_code || '#999';
-				const thumb = poi.thumbnail_url ? '<img class="pop-thumb" src="' +
-					escapeHtml(poi.thumbnail_url) + '" onerror="this.style.display='
-				none '">':
-					'';
+				
+const thumb = poi.thumbnail_url
+  ? '<img class="pop-thumb" src="' +
+    escapeHtml(poi.thumbnail_url) +
+    '" onerror="this.style.display=\'none\'">'
+  : '';
+
 				const link = poi.detail_url ? '<a class="pop-link" href="' + escapeHtml(poi
 						.detail_url) +
 					'" target="_blank" rel="noopener">Read more <svg><use href="#i-arrow"/></svg></a>' :
