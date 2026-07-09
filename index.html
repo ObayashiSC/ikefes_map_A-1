@@ -356,15 +356,20 @@ bottom:0;
 	    .icon-btn{min-width:44px; min-height:44px;}
 	    .cat-item{padding:14px;}
 	  }
-	  .location-guide{
-	  background:#ffffff;
-	  border-bottom:1px solid var(--line);
-	  text-align:center;
-	  padding:8px 12px;
-	  font-size:12px;
-	  line-height:1.5;
-	  z-index:1200;
-	}
+	  
+.location-guide{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  z-index:1000000;
+
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  text-align:center;
+  padding:8px 12px;
+}
+
 	
 	.location-guide a{
 	  color:#0066cc;
