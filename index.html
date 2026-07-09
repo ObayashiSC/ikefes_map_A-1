@@ -606,7 +606,7 @@ const thumb = poi.thumbnail_url
 						.detail_url) +
 					'" target="_blank" rel="noopener">Read more <svg><use href="#i-arrow"/></svg></a>' :
 					'';
-				const desc = (poi.description || '').replace(/<brs*/ ?> /gi, '<br>');
+				const desc = (poi.description || '').replace(/<br\s*\/?>/gi, '<br>');
 					const addr = (poi.spot && (poi.spot.address || poi.spot.spot_name)) || '';
 					return '<div class="pop">' + thumb +
 						'<div class="pop-body">' +
