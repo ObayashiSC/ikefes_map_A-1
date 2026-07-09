@@ -61,19 +61,22 @@
 	  padding-top:var(--safe-top);
 	}
 	
-	  header{
-	    
-position:relative;
-  z-index:5000;
+	 
+header{
+  position:fixed !important;
+  top:0;
+  left:0;
+  right:0;
+  z-index:999999 !important;
 
   background:var(--bg);
   border-bottom:1px solid var(--line);
   padding:11px 14px;
   display:flex;
   align-items:center;
-  gap:8px
+  gap:8px;
+}
 
-	  }
 	  .brand{display:flex; align-items:baseline; gap:9px; flex:1; min-width:0;}
 	  .brand .mark{ width:20px; height:20px; flex-shrink:0; color:var(--ink); }
 	  .brand h1{
