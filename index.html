@@ -595,11 +595,13 @@ position:relative;
 				const color = cat.color_code || '#999';
 				
 
+
 const thumb = poi.thumbnail_url
-  ? '<img class="pop-thumb" src="' +
-    escapeHtml(poi.thumbnail_url) +
-    '" onerror="this.style.display=\'none\'">'
+  ? `<img class="pop-thumb"
+       src="${escapeHtml(poi.thumbnail_url)}"
+       onerror="this.style.display='none';">`
   : '';
+
 
 
 				const link = poi.detail_url ? '<a class="pop-link" href="' + escapeHtml(poi
