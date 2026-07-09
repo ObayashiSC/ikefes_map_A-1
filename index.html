@@ -511,274 +511,277 @@ header{
 	crossorigin=""></script>
 	<script>
 	(() => {
-		const THEME_KEY = 'arc-map-theme';
-		const TILE_LIGHT =
-			'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-		const TILE_DARK =
-			'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+			const THEME_KEY = 'arc-map-theme';
+			const TILE_LIGHT =
+				'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+			const TILE_DARK =
+				'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
-		function getInitialTheme() {
-			const saved = localStorage.getItem(THEME_KEY);
-			if (saved) return saved;
-			// デフォルトを白ベース（light）に固定
-			return 'light';
-		}
-		let currentTheme = getInitialTheme();
+			function getInitialTheme() {
+				const saved = localStorage.getItem(THEME_KEY);
+				if (saved) return saved;
+				// デフォルトを白ベース（light）に固定
+				return 'light';
+			}
+			let currentTheme = getInitialTheme();
 
-		const map = L.map('map', {
-			zoomControl: true,
-			attributionControl: true,
-			preferCanvas: true,
-			zoomSnap: .5,
-		}).setView([34.6937, 135.5023], 14);
+			const map = L.map('map', {
+				zoomControl: true,
+				attributionControl: true,
+				preferCanvas: true,
+				zoomSnap: .5,
+			}).setView([34.6937, 135.5023], 14);
 
-		const tileLayer = L.tileLayer(
-			currentTheme === 'dark' ? TILE_DARK : TILE_LIGHT, {
-				maxZoom: 20,
-				subdomains: 'abcd',
-				attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>',
-			}).addTo(map);
-
-		function applyTheme(t) {
-			document.documentElement.setAttribute('data-theme', t);
-			document.getElementById('themeIcon').innerHTML =
-				'<use href="' + (t === 'dark' ? '#i-sun' : '#i-moon') + '"/>';
-			document.getElementById('themeColorMeta').setAttribute(
-				'content', t === 'dark' ? '#0e0e10' : '#ffffff'
-			);
-			tileLayer.setUrl(t === 'dark' ? TILE_DARK : TILE_LIGHT);
-		}
-		applyTheme(currentTheme);
-
-		const state = {
-			categories: [],
-			pois: [],
-			markers: new Map(),
-			active: new Set(),
-			meMarker: null,
-			meCircle: null,
-			hasFitInitial: false,
-			geoPermission: 'unknown',
-			userDenied: false,
-		};
-
-		function escapeHtml(s) {
-			return String(s || '').replace(/[&<>"']/g, c => ({
-				'&': '&amp;',
-				'<': '&lt;',
-				'>': '&gt;',
-				'"': '&quot;',
-				"'": '&#39;'
-			}[c]));
-		}
-
-		function showToast(msg, ms = 2200) {
-			const t = document.getElementById('toast');
-			t.textContent = msg;
-			t.classList.add('show');
-			clearTimeout(showToast._tid);
-			showToast._tid = setTimeout(() => t.classList.remove('show'), ms);
-		}
-
-		// ピン自体をカテゴリの色にし、枠線を排除
-		function pinSvg(color) {
-			return '<svg viewBox="0 0 30 38" xmlns="http://www.w3.org/2000/svg">' +
-				'<path d="M15 1.5 C 22.5 1.5 27.5 7 27.5 14 C 27.5 22.5 15 36 15 36 C 15 36 2.5 22.5 2.5 14 C 2.5 7 7.5 1.5 15 1.5 Z" fill="' +
-				color + '"/>' +
-				'<circle cx="15" cy="14" r="4.5" fill="var(--bg)"/>' +
-				'</svg>';
-		}
-
-		function makeIcon(color) {
-			return L.divIcon({
-				className: '',
-				html: '<div class="poi-marker">' + pinSvg(color) + '</div>',
-				iconSize: [30, 38],
-				iconAnchor: [15, 36],
-				popupAnchor: [0, -32],
-			});
-		}
-
-		function popupHtml(poi) {
-			const cat = poi.category || {};
-			const color = cat.color_code || '#999';
-
-
-			const thumb = poi.thumbnail_url ?
-				`<img class="pop-thumb" src="${escapeHtml(poi.thumbnail_url)}"
-       onerror="this.style.display='none';">` :
-				'';
-
-
-			const link = poi.detail_url ? '<a class="pop-link" href="' + escapeHtml(poi
-					.detail_url) +
-				'" target="_blank" rel="noopener">Read more <svg><use href="#i-arrow"/></svg></a>' :
-				'';
-			const desc = (poi.description || '').replace(/<br\s*\/?>/gi, '<br>');
-			const addr = (poi.spot && (poi.spot.address || poi.spot.spot_name)) || '';
-			return '<div class="pop">' + thumb +
-				'<div class="pop-body">' +
-				'<div class="pop-cat"><span class="dot" style="background:' + color +
-				'"></span>' + escapeHtml(cat.category_name || '') + '</div>' +
-				'<h3 class="pop-title">' + escapeHtml(poi.event_name || '') + '</h3>' +
-				(addr ? '<div class="pop-addr">' + escapeHtml(addr) + '</div>' : '') +
-				(desc ? '<div class="pop-desc">' + desc + '</div>' : '') +
-				link +
-				'</div></div>';
-		}
-
-		function renderCategories() {
-			const el = document.getElementById('catList');
-			const counts = {};
-			state.pois.forEach(p => {
-				const id = p.category && p.category.category_id;
-				if (id != null) counts[id] = (counts[id] || 0) + 1;
-			});
-			el.innerHTML = state.categories.map(c =>
-				'<label class="cat-item" data-id="' + c.category_id + '">' +
-				'<input type="checkbox" data-id="' + c.category_id + '" checked>' +
-				'<span class="cat-swatch" style="background:' + c.color_code +
-				'"></span>' +
-				'<span class="cat-name">' + escapeHtml(c.category_name) + '</span>' +
-				'<span class="cat-num">' + String(counts[c.category_id] || 0).padStart(2,
-					'0') + '</span>' +
-				'</label>'
-			).join('');
-			el.querySelectorAll('input').forEach(cb => {
-				cb.addEventListener('change', () => {
-					const id = cb.dataset.id;
-					if (cb.checked) state.active.add(id);
-					else state.active.delete(id);
-					cb.closest('.cat-item').classList.toggle('off', !cb.checked);
-					applyFilter();
-				});
-			});
-			document.getElementById('totalCount').textContent = String(state.pois.length)
-				.padStart(3, '0');
-		}
-
-		function renderMarkers() {
-			state.pois.forEach(poi => {
-				const lat = poi.spot && poi.spot.latitude;
-				const lng = poi.spot && poi.spot.longitude;
-				if (typeof lat !== 'number' || typeof lng !== 'number') return;
-				const color = (poi.category && poi.category.color_code) || '#888';
-				const m = L.marker([lat, lng], {
-						icon: makeIcon(color)
-					})
-					.bindPopup(popupHtml(poi), {
-						maxWidth: 290,
-						minWidth: 270,
-						closeButton: true
-					});
-				state.markers.set(poi.event_id, {
-					marker: m,
-					poi
-				});
-			});
-			applyFilter();
-		}
-
-		function applyFilter() {
-			let v = 0;
-			state.markers.forEach(({
-				marker, poi
-			}) => {
-				const id = String(poi.category && poi.category.category_id);
-				if (state.active.has(id)) {
-					marker.addTo(map);
-					v++;
-				} else map.removeLayer(marker);
-			});
-			document.getElementById('visibleCount').textContent = String(v).padStart(3,
-				'0');
-		}
-
-		function setMeMarker(latlng, accuracy) {
-			if (state.meMarker) map.removeLayer(state.meMarker);
-			if (state.meCircle) map.removeLayer(state.meCircle);
-			state.meMarker = L.marker(latlng, {
-				icon: L.divIcon({
-					className: '',
-					html: '<div class="me-marker"></div>',
-					iconSize: [16, 16],
-					iconAnchor: [8, 8],
-				}),
-				zIndexOffset: 1000,
-			}).addTo(map).bindPopup('現在地 / You are here');
-			if (accuracy) {
-				state.meCircle = L.circle(latlng, {
-					radius: accuracy,
-					color: '#0a0a0a',
-					weight: 1,
-					fillColor: '#0a0a0a',
-					fillOpacity: .05,
+			const tileLayer = L.tileLayer(
+				currentTheme === 'dark' ? TILE_DARK : TILE_LIGHT, {
+					maxZoom: 20,
+					subdomains: 'abcd',
+					attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>',
 				}).addTo(map);
+
+			function applyTheme(t) {
+				document.documentElement.setAttribute('data-theme', t);
+				document.getElementById('themeIcon').innerHTML =
+					'<use href="' + (t === 'dark' ? '#i-sun' : '#i-moon') + '"/>';
+				document.getElementById('themeColorMeta').setAttribute(
+					'content', t === 'dark' ? '#0e0e10' : '#ffffff'
+				);
+				tileLayer.setUrl(t === 'dark' ? TILE_DARK : TILE_LIGHT);
 			}
-		}
+			applyTheme(currentTheme);
 
-		function locate(opts) {
-			opts = opts || {};
-			const silent = !!opts.silent;
-			const recenter = opts.recenter !== false;
-			if (!navigator.geolocation) {
-				if (!silent) showToast('位置情報に非対応のブラウザです');
-				return Promise.reject();
+			const state = {
+				categories: [],
+				pois: [],
+				markers: new Map(),
+				active: new Set(),
+				meMarker: null,
+				meCircle: null,
+				hasFitInitial: false,
+				geoPermission: 'unknown',
+				userDenied: false,
+			};
+
+			function escapeHtml(s) {
+				return String(s || '').replace(/[&<>"']/g, c => ({
+					'&': '&amp;',
+					'<': '&lt;',
+					'>': '&gt;',
+					'"': '&quot;',
+					"'": '&#39;'
+				}[c]));
 			}
-			const btn = document.getElementById('locateBtn');
-			return new Promise((resolve, reject) => {
-				navigator.geolocation.getCurrentPosition(pos => {
-					const lat = pos.coords.latitude,
-						lng = pos.coords.longitude,
-						acc = pos.coords.accuracy;
-					const ll = [lat, lng];
-					setMeMarker(ll, acc);
 
-					const guide = document.getElementById('locationGuide');
-					if (guide) {
-						guide.style.display = 'none';
-						
-requestAnimationFrame(() => {
-    map.invalidateSize();
- });
+			function showToast(msg, ms = 2200) {
+				const t = document.getElementById('toast');
+				t.textContent = msg;
+				t.classList.add('show');
+				clearTimeout(showToast._tid);
+				showToast._tid = setTimeout(() => t.classList.remove('show'), ms);
+			}
 
-					}
-					if (recenter) {
-						map.setView(ll, Math.max(map.getZoom(), 15), {
-							animate: true
-						});
-					}
-					resolve(ll);
-				}, err => {
-					if (err && err.code === 1) {
-						state.userDenied = true;
+			// ピン自体をカテゴリの色にし、枠線を排除
+			function pinSvg(color) {
+				return '<svg viewBox="0 0 30 38" xmlns="http://www.w3.org/2000/svg">' +
+					'<path d="M15 1.5 C 22.5 1.5 27.5 7 27.5 14 C 27.5 22.5 15 36 15 36 C 15 36 2.5 22.5 2.5 14 C 2.5 7 7.5 1.5 15 1.5 Z" fill="' +
+					color + '"/>' +
+					'<circle cx="15" cy="14" r="4.5" fill="var(--bg)"/>' +
+					'</svg>';
+			}
 
-						const guide = document.getElementById('locationGuide');
-
-						if (guide && window.innerWidth < 768) {
-							guide.style.display = 'block';
-						}
-
-						openSettingModal();
-					}
-					if (!silent) {
-						if (err && err.code === 1) {
-							openSettingModal();
-						} else if (err && err.code === 2) {
-							showToast('位置情報を取得できません');
-						} else if (err && err.code === 3) {
-							showToast('位置情報の取得がタイムアウトしました');
-						} else {
-							showToast('位置情報エラー');
-						}
-					}
-					reject(err);
-				}, {
-					enableHighAccuracy: true,
-					timeout: 10000,
-					maximumAge: 60000
+			function makeIcon(color) {
+				return L.divIcon({
+					className: '',
+					html: '<div class="poi-marker">' + pinSvg(color) + '</div>',
+					iconSize: [30, 38],
+					iconAnchor: [15, 36],
+					popupAnchor: [0, -32],
 				});
-			});
+			}
+
+			function popupHtml(poi) {
+				const cat = poi.category || {};
+				const color = cat.color_code || '#999';
+
+
+				const thumb = poi.thumbnail_url ?
+					`<img class="pop-thumb" src="${escapeHtml(poi.thumbnail_url)}"
+       onerror="this.style.display='none';">` :
+					'';
+
+
+				const link = poi.detail_url ? '<a class="pop-link" href="' + escapeHtml(poi
+						.detail_url) +
+					'" target="_blank" rel="noopener">Read more <svg><use href="#i-arrow"/></svg></a>' :
+					'';
+				const desc = (poi.description || '').replace(/<br\s*\/?>/gi, '<br>');
+				const addr = (poi.spot && (poi.spot.address || poi.spot.spot_name)) || '';
+				return '<div class="pop">' + thumb +
+					'<div class="pop-body">' +
+					'<div class="pop-cat"><span class="dot" style="background:' + color +
+					'"></span>' + escapeHtml(cat.category_name || '') + '</div>' +
+					'<h3 class="pop-title">' + escapeHtml(poi.event_name || '') + '</h3>' +
+					(addr ? '<div class="pop-addr">' + escapeHtml(addr) + '</div>' : '') +
+					(desc ? '<div class="pop-desc">' + desc + '</div>' : '') +
+					link +
+					'</div></div>';
+			}
+
+			function renderCategories() {
+				const el = document.getElementById('catList');
+				const counts = {};
+				state.pois.forEach(p => {
+					const id = p.category && p.category.category_id;
+					if (id != null) counts[id] = (counts[id] || 0) + 1;
+				});
+				el.innerHTML = state.categories.map(c =>
+					'<label class="cat-item" data-id="' + c.category_id + '">' +
+					'<input type="checkbox" data-id="' + c.category_id + '" checked>' +
+					'<span class="cat-swatch" style="background:' + c.color_code +
+					'"></span>' +
+					'<span class="cat-name">' + escapeHtml(c.category_name) + '</span>' +
+					'<span class="cat-num">' + String(counts[c.category_id] || 0).padStart(2,
+						'0') + '</span>' +
+					'</label>'
+				).join('');
+				el.querySelectorAll('input').forEach(cb => {
+					cb.addEventListener('change', () => {
+						const id = cb.dataset.id;
+						if (cb.checked) state.active.add(id);
+						else state.active.delete(id);
+						cb.closest('.cat-item').classList.toggle('off', !cb.checked);
+						applyFilter();
+					});
+				});
+				document.getElementById('totalCount').textContent = String(state.pois.length)
+					.padStart(3, '0');
+			}
+
+			function renderMarkers() {
+				state.pois.forEach(poi => {
+					const lat = poi.spot && poi.spot.latitude;
+					const lng = poi.spot && poi.spot.longitude;
+					if (typeof lat !== 'number' || typeof lng !== 'number') return;
+					const color = (poi.category && poi.category.color_code) || '#888';
+					const m = L.marker([lat, lng], {
+							icon: makeIcon(color)
+						})
+						.bindPopup(popupHtml(poi), {
+							maxWidth: 290,
+							minWidth: 270,
+							closeButton: true
+						});
+					state.markers.set(poi.event_id, {
+						marker: m,
+						poi
+					});
+				});
+				applyFilter();
+			}
+
+			function applyFilter() {
+				let v = 0;
+				state.markers.forEach(({
+					marker, poi
+				}) => {
+					const id = String(poi.category && poi.category.category_id);
+					if (state.active.has(id)) {
+						marker.addTo(map);
+						v++;
+					} else map.removeLayer(marker);
+				});
+				document.getElementById('visibleCount').textContent = String(v).padStart(3,
+					'0');
+			}
+
+			function setMeMarker(latlng, accuracy) {
+				if (state.meMarker) map.removeLayer(state.meMarker);
+				if (state.meCircle) map.removeLayer(state.meCircle);
+				state.meMarker = L.marker(latlng, {
+					icon: L.divIcon({
+						className: '',
+						html: '<div class="me-marker"></div>',
+						iconSize: [16, 16],
+						iconAnchor: [8, 8],
+					}),
+					zIndexOffset: 1000,
+				}).addTo(map).bindPopup('現在地 / You are here');
+				if (accuracy) {
+					state.meCircle = L.circle(latlng, {
+						radius: accuracy,
+						color: '#0a0a0a',
+						weight: 1,
+						fillColor: '#0a0a0a',
+						fillOpacity: .05,
+					}).addTo(map);
+				}
+			}
+
+			function locate(opts) {
+				opts = opts || {};
+				const silent = !!opts.silent;
+				const recenter = opts.recenter !== false;
+				if (!navigator.geolocation) {
+					if (!silent) showToast('位置情報に非対応のブラウザです');
+					return Promise.reject();
+				}
+				const btn = document.getElementById('locateBtn');
+				return new Promise((resolve, reject) => {
+						navigator.geolocation.getCurrentPosition(pos => {
+								const lat = pos.coords.latitude,
+									lng = pos.coords.longitude,
+									acc = pos.coords.accuracy;
+								const ll = [lat, lng];
+								setMeMarker(ll, acc);
+
+								const guide = document.getElementById('locationGuide');
+
+								if (guide) {
+									guide.style.display = 'none';
+
+									requestAnimationFrame(() => {
+										map.invalidateSize();
+									});
+								}
+
+
+							}
+							if (recenter) {
+								map.setView(ll, Math.max(map.getZoom(), 15), {
+									animate: true
+								});
+							}
+							resolve(ll);
+						}, err => {
+							if (err && err.code === 1) {
+								state.userDenied = true;
+
+								const guide = document.getElementById('locationGuide');
+
+								if (guide && window.innerWidth < 768) {
+									guide.style.display = 'block';
+								}
+
+								openSettingModal();
+							}
+							if (!silent) {
+								if (err && err.code === 1) {
+									openSettingModal();
+								} else if (err && err.code === 2) {
+									showToast('位置情報を取得できません');
+								} else if (err && err.code === 3) {
+									showToast('位置情報の取得がタイムアウトしました');
+								} else {
+									showToast('位置情報エラー');
+								}
+							}
+							reject(err);
+						}, {
+							enableHighAccuracy: true,
+							timeout: 10000,
+							maximumAge: 60000
+						});
+				});
 		}
 
 		function togglePanel(force) {
@@ -796,25 +799,21 @@ requestAnimationFrame(() => {
 
 		document.getElementById('locateBtn').addEventListener('click', () => {
 			locate();
-		});
-		document.getElementById('toggleFilter').addEventListener('click', () =>
-			togglePanel());
-		document.getElementById('overlay').addEventListener('click', () =>
-			togglePanel(false));
-		document.getElementById('themeBtn').addEventListener('click', () => {
-			currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-			localStorage.setItem(THEME_KEY, currentTheme);
-			applyTheme(currentTheme);
-		});
-		document.getElementById('selectAll').addEventListener('click', () => {
+		}); document.getElementById('toggleFilter').addEventListener('click', () =>
+			togglePanel()); document.getElementById('overlay').addEventListener('click', () =>
+			togglePanel(false)); document.getElementById('themeBtn').addEventListener(
+			'click', () => {
+				currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+				localStorage.setItem(THEME_KEY, currentTheme);
+				applyTheme(currentTheme);
+			}); document.getElementById('selectAll').addEventListener('click', () => {
 			document.querySelectorAll('#catList input').forEach(cb => {
 				cb.checked = true;
 				state.active.add(cb.dataset.id);
 				cb.closest('.cat-item').classList.remove('off');
 			});
 			applyFilter();
-		});
-		document.getElementById('clearAll').addEventListener('click', () => {
+		}); document.getElementById('clearAll').addEventListener('click', () => {
 			document.querySelectorAll('#catList input').forEach(cb => {
 				cb.checked = false;
 				cb.closest('.cat-item').classList.add('off');
@@ -834,35 +833,35 @@ requestAnimationFrame(() => {
 		*/
 
 		fetch('pois.json')
-			.then(r => {
-				if (!r.ok) throw new Error('pois.json 読み込みエラー (' + r.status + ')');
-				return r.json();
-			})
-			.then(data => {
-				state.categories = data.categories || [];
-				state.pois = (data.pois || []).filter(p =>
-					p.spot && typeof p.spot.latitude === 'number' && typeof p.spot.longitude ===
-					'number'
-				);
-				state.categories.forEach(c => state.active.add(String(c.category_id)));
-				renderCategories();
-				renderMarkers();
+		.then(r => {
+			if (!r.ok) throw new Error('pois.json 読み込みエラー (' + r.status + ')');
+			return r.json();
+		})
+		.then(data => {
+			state.categories = data.categories || [];
+			state.pois = (data.pois || []).filter(p =>
+				p.spot && typeof p.spot.latitude === 'number' && typeof p.spot.longitude ===
+				'number'
+			);
+			state.categories.forEach(c => state.active.add(String(c.category_id)));
+			renderCategories();
+			renderMarkers();
 
-				const b = L.latLngBounds(state.pois.map(p => [p.spot.latitude, p.spot.longitude]));
-				if (b.isValid()) {
-					map.fitBounds(b, {
-						padding: [40, 40]
-					});
-					state.hasFitInitial = true;
-				}
-				document.getElementById('loading').style.display = 'none';
+			const b = L.latLngBounds(state.pois.map(p => [p.spot.latitude, p.spot.longitude]));
+			if (b.isValid()) {
+				map.fitBounds(b, {
+					padding: [40, 40]
+				});
+				state.hasFitInitial = true;
+			}
+			document.getElementById('loading').style.display = 'none';
 
-				initGeoByPermission();
-			})
-			.catch(err => {
-				document.getElementById('loading').textContent = 'Error: ' + err.message;
-				console.error(err);
-			});
+			initGeoByPermission();
+		})
+		.catch(err => {
+			document.getElementById('loading').textContent = 'Error: ' + err.message;
+			console.error(err);
+		});
 
 		function openSettingModal() {
 
@@ -885,8 +884,8 @@ requestAnimationFrame(() => {
 
 		　　
 		document.getElementById('settingCancel')
-			.addEventListener('click', closeSettingModal);
-		document.getElementById('settingGo').addEventListener('click', () => {
+		.addEventListener('click', closeSettingModal); document.getElementById(
+			'settingGo').addEventListener('click', () => {
 			window.open(
 				'https://drop.machiapps.com/nakanoshima/location-permissions/',
 				'_blank', 'noopener,noreferrer');
@@ -943,11 +942,11 @@ requestAnimationFrame(() => {
 
 						if (guide) {
 							guide.style.display = 'none';
-requestAnimationFrame(() => {
-    map.invalidateSize();
- });
+							requestAnimationFrame(() => {
+								map.invalidateSize();
+							});
 
-							
+
 						}
 
 						tryAutoLocate();
@@ -976,10 +975,10 @@ requestAnimationFrame(() => {
 							if (guide) {
 								guide.style.display = 'none';
 
-								
-requestAnimationFrame(() => {
-    map.invalidateSize();
- });
+
+								requestAnimationFrame(() => {
+									map.invalidateSize();
+								});
 
 							}
 
