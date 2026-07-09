@@ -737,6 +737,11 @@ header{
 					const guide = document.getElementById('locationGuide');
 					if (guide) {
 						guide.style.display = 'none';
+						
+requestAnimationFrame(() => {
+    map.invalidateSize();
+}
+
 					}
 					if (recenter) {
 						map.setView(ll, Math.max(map.getZoom(), 15), {
@@ -938,6 +943,11 @@ header{
 
 						if (guide) {
 							guide.style.display = 'none';
+requestAnimationFrame(() => {
+    map.invalidateSize();
+}
+
+							
 						}
 
 						tryAutoLocate();
@@ -965,6 +975,12 @@ header{
 
 							if (guide) {
 								guide.style.display = 'none';
+
+								
+requestAnimationFrame(() => {
+    map.invalidateSize();
+}
+
 							}
 
 							locate({
