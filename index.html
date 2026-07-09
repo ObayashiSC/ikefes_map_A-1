@@ -1042,9 +1042,9 @@ header{
 
 					state.userDenied = true;
 
-					if (guide) {
-						guide.style.display = 'block';
-					}
+					if (guide && window.innerWidth < 768) {
+    guide.style.display = 'block';
+}
 
 				} else {
 
