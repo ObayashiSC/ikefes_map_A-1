@@ -289,7 +289,7 @@ header{
 	  .modal-backdrop{
 	    position:absolute; inset:0;
 	    background:rgba(0,0,0,.45);
-	    z-index:6000;
+	    z-index:10000;
 	    display:none; align-items:center; justify-content:center;
 	    backdrop-filter:blur(3px);
 	    padding:20px;
@@ -746,7 +746,7 @@ header{
 
     const guide = document.getElementById('locationGuide');
 
-    if (guide) {
+    if (guide && !state.userDenied) {
         guide.style.display = 'none';
 
         requestAnimationFrame(() => {
@@ -950,7 +950,7 @@ header{
 
 						state.userDenied = false;
 
-						if (guide) {
+						if (guide && !state.userDenied) {
 							guide.style.display = 'none';
 							requestAnimationFrame(() => {
 								map.invalidateSize();
@@ -982,7 +982,7 @@ header{
 
 							state.userDenied = false;
 
-							if (guide) {
+							if (guide && !state.userDenied) {
 								guide.style.display = 'none';
 
 
@@ -1057,7 +1057,7 @@ header{
 
 					state.userDenied = false;
 
-					if (guide) {
+					if (guide && !state.userDenied) {
 						guide.style.display = 'none';
 					}
 
