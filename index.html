@@ -972,20 +972,21 @@ header{
 
 
 				document.getElementById('closeGuideBtn')
-					.addEventListener('click', () => {
+.addEventListener('click', () => {
 
-						state.guideDismissed = true;
+    state.guideDismissed = true;
 
-						const guide = document.getElementById('locationGuide');
+    const guide = document.getElementById('locationGuide');
 
-						if (guide) {
-							guide.style.display = 'none';
+    if (guide) {
+        guide.style.display = 'none';
 
-							requestAnimationFrame(() => {
-								map.invalidateSize();
-							});
-						}
+        requestAnimationFrame(() => {
+            map.invalidateSize();
+        });
+    }
 
+});  
 
 						document.getElementById(
 							'settingGo').addEventListener('click', () => {
