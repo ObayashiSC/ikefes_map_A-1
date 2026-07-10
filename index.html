@@ -818,42 +818,59 @@ header{
 
 								resolve(ll);
 
-							}, err => {
-								if (err && err.code === 1) {
-									state.userDenied = true;
+}, err => {
 
-									const guide = document.getElementById('locationGuide');
+    if (err && err.code === 1) {
 
-									if (guide && window.innerWidth < 768) {
-										guide.style.display = 'block';
-									}
+        state.userDenied = true;
 
-									if (!state.dismissedPermissionModal) {
-										openSettingModal();
-									}
+        const guide = document.getElementById('locationGuide');
 
-									if (!silent) {
-										if (err && err.code === 1) {
+        if (
+            guide &&
+            window.innerWidth < 768 &&
+            !state.guideDismissed
+        ) {
+            guide.style.display = 'block';
+        }
 
-											if (!state.dismissedPermissionModal) {
-												openSettingModal();
-											}
+        if (!state.dismissedPermissionModal) {
+            openSettingModal();
+        }
 
+    }
 
-										} else if (err && err.code === 2) {
-											showToast('位置情報を取得できません');
-										} else if (err && err.code === 3) {
-											showToast('位置情報の取得がタイムアウトしました');
-										} else {
-											showToast('位置情報エラー');
-										}
-									}
-									reject(err);
+    if (!silent) {
+
+        if (err && err.code === 1) {
+
+            if (!state.dismissedPermissionModal) {
+                openSettingModal();
+            }
+
+        } else if (err && err.code === 2) {
+
+            showToast('位置情報を取得できません');
+
+        } else if (err && err.code === 3) {
+
+            showToast('位置情報の取得がタイムアウトしました');
+
+        } else {
+
+            showToast('位置情報エラー');
+
+        }
+
+    }
+
+    reject(err);
+
 }, {
-									enableHighAccuracy: true,
-									timeout: 10000,
-									maximumAge: 60000
-								});
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 60000
+});
 						});
 				}
 
