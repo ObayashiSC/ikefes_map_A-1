@@ -1163,43 +1163,6 @@ header{
 		}).catch(() => {});
 
 	});
-
-
-	if (!navigator.permissions || !navigator.permissions.query) return;
-
-	navigator.permissions.query({
-		name: 'geolocation'
-	}).then(res => {
-
-		state.geoPermission = res.state;
-
-		const guide = document.getElementById('locationGuide');
-
-		if (res.state === 'denied') {
-
-			state.userDenied = true;
-
-			if (guide && window.innerWidth < 768) {
-				guide.style.display = 'block';
-			}
-
-		} else {
-
-			state.userDenied = false;
-
-			if (guide && state.geoPermission === 'granted') {
-				guide.style.display = 'none';
-			}
-
-			locate({
-				silent: true,
-				recenter: false
-			}).catch(() => {});
-		}
-
-	}).catch(() => {});
-	})();
-
 	</script>
 </body>
 
