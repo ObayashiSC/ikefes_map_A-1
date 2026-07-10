@@ -820,24 +820,22 @@ header{
 
 }, err => {
 
-    if (err && err.code === 1) {
+   if (err && err.code === 1) {
 
-        state.userDenied = true;
+    state.userDenied = true;
 
-        const guide = document.getElementById('locationGuide');
+    const guide = document.getElementById('locationGuide');
 
-        if (
-            guide &&
-            window.innerWidth < 768 &&
-            !state.guideDismissed
-        ) {
-            guide.style.display = 'block';
-        }
+    if (
+        guide &&
+        window.innerWidth < 768 &&
+        !state.guideDismissed
+    ) {
+        guide.style.display = 'block';
+    }
 
-        if (!state.dismissedPermissionModal) {
-            openSettingModal();
-        }
-
+    if (!state.dismissedPermissionModal) {
+        openSettingModal();
     }
 
     if (!silent) {
@@ -866,11 +864,14 @@ header{
 
     reject(err);
 
+}  
+
 }, {
     enableHighAccuracy: true,
     timeout: 10000,
     maximumAge: 60000
 });
+
 						});
 				}
 
