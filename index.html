@@ -546,660 +546,660 @@ header{
 	crossorigin=""></script>
 	<script>
 	(() => {
-			const THEME_KEY = 'arc-map-theme';
-			const TILE_LIGHT =
-				'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-			const TILE_DARK =
-				'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+	const THEME_KEY = 'arc-map-theme';
+	const TILE_LIGHT =
+		'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+	const TILE_DARK =
+		'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
-			function getInitialTheme() {
-				const saved = localStorage.getItem(THEME_KEY);
-				if (saved) return saved;
-				// デフォルトを白ベース（light）に固定
-				return 'light';
-			}
-			let currentTheme = getInitialTheme();
+	function getInitialTheme() {
+		const saved = localStorage.getItem(THEME_KEY);
+		if (saved) return saved;
+		// デフォルトを白ベース（light）に固定
+		return 'light';
+	}
+	let currentTheme = getInitialTheme();
 
-			const map = L.map('map', {
-				zoomControl: true,
-				attributionControl: true,
-				preferCanvas: true,
-				zoomSnap: .5,
-			}).setView([34.6937, 135.5023], 14);
+	const map = L.map('map', {
+		zoomControl: true,
+		attributionControl: true,
+		preferCanvas: true,
+		zoomSnap: .5,
+	}).setView([34.6937, 135.5023], 14);
 
-			const tileLayer = L.tileLayer(
-				currentTheme === 'dark' ? TILE_DARK : TILE_LIGHT, {
-					maxZoom: 20,
-					subdomains: 'abcd',
-					attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>',
-				}).addTo(map);
+	const tileLayer = L.tileLayer(
+		currentTheme === 'dark' ? TILE_DARK : TILE_LIGHT, {
+			maxZoom: 20,
+			subdomains: 'abcd',
+			attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>',
+		}).addTo(map);
 
-			function applyTheme(t) {
-				document.documentElement.setAttribute('data-theme', t);
-				document.getElementById('themeIcon').innerHTML =
-					'<use href="' + (t === 'dark' ? '#i-sun' : '#i-moon') + '"/>';
-				document.getElementById('themeColorMeta').setAttribute(
-					'content', t === 'dark' ? '#0e0e10' : '#ffffff'
-				);
-				tileLayer.setUrl(t === 'dark' ? TILE_DARK : TILE_LIGHT);
-			}
-			applyTheme(currentTheme);
+	function applyTheme(t) {
+		document.documentElement.setAttribute('data-theme', t);
+		document.getElementById('themeIcon').innerHTML =
+			'<use href="' + (t === 'dark' ? '#i-sun' : '#i-moon') + '"/>';
+		document.getElementById('themeColorMeta').setAttribute(
+			'content', t === 'dark' ? '#0e0e10' : '#ffffff'
+		);
+		tileLayer.setUrl(t === 'dark' ? TILE_DARK : TILE_LIGHT);
+	}
+	applyTheme(currentTheme);
 
-			const state = {
-				categories: [],
-				pois: [],
-				markers: new Map(),
-				active: new Set(),
-				meMarker: null,
-				meCircle: null,
-				hasFitInitial: false,
-				geoPermission: 'unknown',
-				userDenied: false,
-
-
-				dismissedPermissionModal: false,
-				guideDismissed: false
-
-			};
-
-			function escapeHtml(s) {
-				return String(s || '').replace(/[&<>"']/g, c => ({
-					'&': '&amp;',
-					'<': '&lt;',
-					'>': '&gt;',
-					'"': '&quot;',
-					"'": '&#39;'
-				}[c]));
-			}
-
-			function showToast(msg, ms = 2200) {
-				const t = document.getElementById('toast');
-				t.textContent = msg;
-				t.classList.add('show');
-				clearTimeout(showToast._tid);
-				showToast._tid = setTimeout(() => t.classList.remove('show'), ms);
-			}
-
-			// ピン自体をカテゴリの色にし、枠線を排除
-			function pinSvg(color) {
-				return '<svg viewBox="0 0 30 38" xmlns="http://www.w3.org/2000/svg">' +
-					'<path d="M15 1.5 C 22.5 1.5 27.5 7 27.5 14 C 27.5 22.5 15 36 15 36 C 15 36 2.5 22.5 2.5 14 C 2.5 7 7.5 1.5 15 1.5 Z" fill="' +
-					color + '"/>' +
-					'<circle cx="15" cy="14" r="4.5" fill="var(--bg)"/>' +
-					'</svg>';
-			}
-
-			function makeIcon(color) {
-				return L.divIcon({
-					className: '',
-					html: '<div class="poi-marker">' + pinSvg(color) + '</div>',
-					iconSize: [30, 38],
-					iconAnchor: [15, 36],
-					popupAnchor: [0, -32],
-				});
-			}
-
-			function popupHtml(poi) {
-				const cat = poi.category || {};
-				const color = cat.color_code || '#999';
+	const state = {
+		categories: [],
+		pois: [],
+		markers: new Map(),
+		active: new Set(),
+		meMarker: null,
+		meCircle: null,
+		hasFitInitial: false,
+		geoPermission: 'unknown',
+		userDenied: false,
 
 
-				const thumb = poi.thumbnail_url ?
-					`<img class="pop-thumb" src="${escapeHtml(poi.thumbnail_url)}"
+		dismissedPermissionModal: false,
+		guideDismissed: false
+
+	};
+
+	function escapeHtml(s) {
+		return String(s || '').replace(/[&<>"']/g, c => ({
+			'&': '&amp;',
+			'<': '&lt;',
+			'>': '&gt;',
+			'"': '&quot;',
+			"'": '&#39;'
+		}[c]));
+	}
+
+	function showToast(msg, ms = 2200) {
+		const t = document.getElementById('toast');
+		t.textContent = msg;
+		t.classList.add('show');
+		clearTimeout(showToast._tid);
+		showToast._tid = setTimeout(() => t.classList.remove('show'), ms);
+	}
+
+	// ピン自体をカテゴリの色にし、枠線を排除
+	function pinSvg(color) {
+		return '<svg viewBox="0 0 30 38" xmlns="http://www.w3.org/2000/svg">' +
+			'<path d="M15 1.5 C 22.5 1.5 27.5 7 27.5 14 C 27.5 22.5 15 36 15 36 C 15 36 2.5 22.5 2.5 14 C 2.5 7 7.5 1.5 15 1.5 Z" fill="' +
+			color + '"/>' +
+			'<circle cx="15" cy="14" r="4.5" fill="var(--bg)"/>' +
+			'</svg>';
+	}
+
+	function makeIcon(color) {
+		return L.divIcon({
+			className: '',
+			html: '<div class="poi-marker">' + pinSvg(color) + '</div>',
+			iconSize: [30, 38],
+			iconAnchor: [15, 36],
+			popupAnchor: [0, -32],
+		});
+	}
+
+	function popupHtml(poi) {
+		const cat = poi.category || {};
+		const color = cat.color_code || '#999';
+
+
+		const thumb = poi.thumbnail_url ?
+			`<img class="pop-thumb" src="${escapeHtml(poi.thumbnail_url)}"
        onerror="this.style.display='none';">` :
-					'';
+			'';
 
 
-				const link = poi.detail_url ? '<a class="pop-link" href="' + escapeHtml(poi
-						.detail_url) +
-					'" target="_blank" rel="noopener">Read more <svg><use href="#i-arrow"/></svg></a>' :
-					'';
-				const desc = (poi.description || '').replace(/<br\s*\/?>/gi, '<br>');
-				const addr = (poi.spot && (poi.spot.address || poi.spot.spot_name)) || '';
-				return '<div class="pop">' + thumb +
-					'<div class="pop-body">' +
-					'<div class="pop-cat"><span class="dot" style="background:' + color +
-					'"></span>' + escapeHtml(cat.category_name || '') + '</div>' +
-					'<h3 class="pop-title">' + escapeHtml(poi.event_name || '') + '</h3>' +
-					(addr ? '<div class="pop-addr">' + escapeHtml(addr) + '</div>' : '') +
-					(desc ? '<div class="pop-desc">' + desc + '</div>' : '') +
-					link +
-					'</div></div>';
-			}
+		const link = poi.detail_url ? '<a class="pop-link" href="' + escapeHtml(poi
+				.detail_url) +
+			'" target="_blank" rel="noopener">Read more <svg><use href="#i-arrow"/></svg></a>' :
+			'';
+		const desc = (poi.description || '').replace(/<br\s*\/?>/gi, '<br>');
+		const addr = (poi.spot && (poi.spot.address || poi.spot.spot_name)) || '';
+		return '<div class="pop">' + thumb +
+			'<div class="pop-body">' +
+			'<div class="pop-cat"><span class="dot" style="background:' + color +
+			'"></span>' + escapeHtml(cat.category_name || '') + '</div>' +
+			'<h3 class="pop-title">' + escapeHtml(poi.event_name || '') + '</h3>' +
+			(addr ? '<div class="pop-addr">' + escapeHtml(addr) + '</div>' : '') +
+			(desc ? '<div class="pop-desc">' + desc + '</div>' : '') +
+			link +
+			'</div></div>';
+	}
 
-			function renderCategories() {
-				const el = document.getElementById('catList');
-				const counts = {};
-				state.pois.forEach(p => {
-					const id = p.category && p.category.category_id;
-					if (id != null) counts[id] = (counts[id] || 0) + 1;
-				});
-				el.innerHTML = state.categories.map(c =>
-					'<label class="cat-item" data-id="' + c.category_id + '">' +
-					'<input type="checkbox" data-id="' + c.category_id + '" checked>' +
-					'<span class="cat-swatch" style="background:' + c.color_code +
-					'"></span>' +
-					'<span class="cat-name">' + escapeHtml(c.category_name) + '</span>' +
-					'<span class="cat-num">' + String(counts[c.category_id] || 0).padStart(2,
-						'0') + '</span>' +
-					'</label>'
-				).join('');
-				el.querySelectorAll('input').forEach(cb => {
-					cb.addEventListener('change', () => {
-						const id = cb.dataset.id;
-						if (cb.checked) state.active.add(id);
-						else state.active.delete(id);
-						cb.closest('.cat-item').classList.toggle('off', !cb.checked);
-						applyFilter();
-					});
-				});
-				document.getElementById('totalCount').textContent = String(state.pois.length)
-					.padStart(3, '0');
-			}
-
-			function renderMarkers() {
-				state.pois.forEach(poi => {
-					const lat = poi.spot && poi.spot.latitude;
-					const lng = poi.spot && poi.spot.longitude;
-					if (typeof lat !== 'number' || typeof lng !== 'number') return;
-					const color = (poi.category && poi.category.color_code) || '#888';
-					const m = L.marker([lat, lng], {
-							icon: makeIcon(color)
-						})
-						.bindPopup(popupHtml(poi), {
-							maxWidth: 290,
-							minWidth: 270,
-							closeButton: true
-						});
-					state.markers.set(poi.event_id, {
-						marker: m,
-						poi
-					});
-				});
+	function renderCategories() {
+		const el = document.getElementById('catList');
+		const counts = {};
+		state.pois.forEach(p => {
+			const id = p.category && p.category.category_id;
+			if (id != null) counts[id] = (counts[id] || 0) + 1;
+		});
+		el.innerHTML = state.categories.map(c =>
+			'<label class="cat-item" data-id="' + c.category_id + '">' +
+			'<input type="checkbox" data-id="' + c.category_id + '" checked>' +
+			'<span class="cat-swatch" style="background:' + c.color_code +
+			'"></span>' +
+			'<span class="cat-name">' + escapeHtml(c.category_name) + '</span>' +
+			'<span class="cat-num">' + String(counts[c.category_id] || 0).padStart(2,
+				'0') + '</span>' +
+			'</label>'
+		).join('');
+		el.querySelectorAll('input').forEach(cb => {
+			cb.addEventListener('change', () => {
+				const id = cb.dataset.id;
+				if (cb.checked) state.active.add(id);
+				else state.active.delete(id);
+				cb.closest('.cat-item').classList.toggle('off', !cb.checked);
 				applyFilter();
-			}
+			});
+		});
+		document.getElementById('totalCount').textContent = String(state.pois.length)
+			.padStart(3, '0');
+	}
 
-			function applyFilter() {
-				let v = 0;
-				state.markers.forEach(({
-					marker, poi
-				}) => {
-					const id = String(poi.category && poi.category.category_id);
-					if (state.active.has(id)) {
-						marker.addTo(map);
-						v++;
-					} else map.removeLayer(marker);
+	function renderMarkers() {
+		state.pois.forEach(poi => {
+			const lat = poi.spot && poi.spot.latitude;
+			const lng = poi.spot && poi.spot.longitude;
+			if (typeof lat !== 'number' || typeof lng !== 'number') return;
+			const color = (poi.category && poi.category.color_code) || '#888';
+			const m = L.marker([lat, lng], {
+					icon: makeIcon(color)
+				})
+				.bindPopup(popupHtml(poi), {
+					maxWidth: 290,
+					minWidth: 270,
+					closeButton: true
 				});
-				document.getElementById('visibleCount').textContent = String(v).padStart(3,
-					'0');
-			}
+			state.markers.set(poi.event_id, {
+				marker: m,
+				poi
+			});
+		});
+		applyFilter();
+	}
 
-			function setMeMarker(latlng, accuracy) {
-				if (state.meMarker) map.removeLayer(state.meMarker);
-				if (state.meCircle) map.removeLayer(state.meCircle);
-				state.meMarker = L.marker(latlng, {
-					icon: L.divIcon({
-						className: '',
-						html: '<div class="me-marker"></div>',
-						iconSize: [16, 16],
-						iconAnchor: [8, 8],
-					}),
-					zIndexOffset: 1000,
-				}).addTo(map).bindPopup('現在地 / You are here');
-				if (accuracy) {
-					state.meCircle = L.circle(latlng, {
-						radius: accuracy,
-						color: '#0a0a0a',
-						weight: 1,
-						fillColor: '#0a0a0a',
-						fillOpacity: .05,
-					}).addTo(map);
-				}
-			}
+	function applyFilter() {
+		let v = 0;
+		state.markers.forEach(({
+			marker, poi
+		}) => {
+			const id = String(poi.category && poi.category.category_id);
+			if (state.active.has(id)) {
+				marker.addTo(map);
+				v++;
+			} else map.removeLayer(marker);
+		});
+		document.getElementById('visibleCount').textContent = String(v).padStart(3,
+			'0');
+	}
 
-			function locate(opts) {
-				opts = opts || {};
-				const silent = !!opts.silent;
-				const recenter = opts.recenter !== false;
-				if (!navigator.geolocation) {
-					if (!silent) showToast('位置情報に非対応のブラウザです');
-					return Promise.reject();
-				}
-				const btn = document.getElementById('locateBtn');
-				return new Promise((resolve, reject) => {
-						navigator.geolocation.getCurrentPosition(pos => {
+	function setMeMarker(latlng, accuracy) {
+		if (state.meMarker) map.removeLayer(state.meMarker);
+		if (state.meCircle) map.removeLayer(state.meCircle);
+		state.meMarker = L.marker(latlng, {
+			icon: L.divIcon({
+				className: '',
+				html: '<div class="me-marker"></div>',
+				iconSize: [16, 16],
+				iconAnchor: [8, 8],
+			}),
+			zIndexOffset: 1000,
+		}).addTo(map).bindPopup('現在地 / You are here');
+		if (accuracy) {
+			state.meCircle = L.circle(latlng, {
+				radius: accuracy,
+				color: '#0a0a0a',
+				weight: 1,
+				fillColor: '#0a0a0a',
+				fillOpacity: .05,
+			}).addTo(map);
+		}
+	}
 
-								const lat = pos.coords.latitude,
-									lng = pos.coords.longitude,
-									acc = pos.coords.accuracy;
+	function locate(opts) {
+		opts = opts || {};
+		const silent = !!opts.silent;
+		const recenter = opts.recenter !== false;
+		if (!navigator.geolocation) {
+			if (!silent) showToast('位置情報に非対応のブラウザです');
+			return Promise.reject();
+		}
+		const btn = document.getElementById('locateBtn');
+		return new Promise((resolve, reject) => {
+			navigator.geolocation.getCurrentPosition(pos => {
 
-								const ll = [lat, lng];
+				const lat = pos.coords.latitude,
+					lng = pos.coords.longitude,
+					acc = pos.coords.accuracy;
 
-								setMeMarker(ll, acc);
+				const ll = [lat, lng];
 
-								const guide = document.getElementById('locationGuide');
+				setMeMarker(ll, acc);
 
-								if (guide && state.geoPermission === 'granted') {
-									guide.style.display = 'none';
+				const guide = document.getElementById('locationGuide');
 
-									requestAnimationFrame(() => {
-										map.invalidateSize();
-									});
-								}
+				if (guide && state.geoPermission === 'granted') {
+					guide.style.display = 'none';
 
-								if (recenter) {
-									map.setView(ll, Math.max(map.getZoom(), 15), {
-										animate: true
-									});
-								}
-
-								resolve(ll);
-
-}, err => {
-
-   if (err && err.code === 1) {
-
-    state.userDenied = true;
-
-    const guide = document.getElementById('locationGuide');
-
-    if (
-        guide &&
-        window.innerWidth < 768 &&
-        !state.guideDismissed
-    ) {
-        guide.style.display = 'block';
-    }
-
-    if (!state.dismissedPermissionModal) {
-        openSettingModal();
-    }
-
-    if (!silent) {
-
-        if (err && err.code === 1) {
-
-            if (!state.dismissedPermissionModal) {
-                openSettingModal();
-            }
-
-        } else if (err && err.code === 2) {
-
-            showToast('位置情報を取得できません');
-
-        } else if (err && err.code === 3) {
-
-            showToast('位置情報の取得がタイムアウトしました');
-
-        } else {
-
-            showToast('位置情報エラー');
-
-        }
-
-    }
-
-    reject(err);
-
-}  
-
-}, {
-    enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 60000
-});
-
-						});
-				}
-
-				function togglePanel(force) {
-					const panel = document.getElementById('panel');
-					const overlay = document.getElementById('overlay');
-					const btn = document.getElementById('toggleFilter');
-					const open = force !== undefined ? force : !panel.classList.contains(
-						'open');
-					panel.classList.toggle('open', open);
-					overlay.classList.toggle('show', open);
-					btn.classList.toggle('active', open);
-					panel.setAttribute('aria-hidden', String(!open));
-					setTimeout(() => map.invalidateSize(), 300);
-				}
-
-				
-document.getElementById('locateBtn')
-.addEventListener('click', () => {
-
-    if (state.geoPermission !== 'granted') {
-
-        openSettingModal();
-
-        return;
-    }
-
-    locate();
-
-});
-
-				document.getElementById('toggleFilter').addEventListener('click', () =>
-					togglePanel());
-				document.getElementById('overlay').addEventListener('click', () =>
-					togglePanel(false));
-				document.getElementById('themeBtn').addEventListener(
-					'click', () => {
-						currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-						localStorage.setItem(THEME_KEY, currentTheme);
-						applyTheme(currentTheme);
+					requestAnimationFrame(() => {
+						map.invalidateSize();
 					});
-				document.getElementById('selectAll').addEventListener('click', () => {
-					document.querySelectorAll('#catList input').forEach(cb => {
-						cb.checked = true;
-						state.active.add(cb.dataset.id);
-						cb.closest('.cat-item').classList.remove('off');
-					});
-					applyFilter();
-				});
-				document.getElementById('clearAll').addEventListener('click', () => {
-					document.querySelectorAll('#catList input').forEach(cb => {
-						cb.checked = false;
-						cb.closest('.cat-item').classList.add('off');
-					});
-					state.active.clear();
-					applyFilter();
-				});
-
-				// OS設定変更時の自動追従リスナーを無効化（デフォルト白固定のため）
-				/*
-				window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e=>{
-				  if (!localStorage.getItem(THEME_KEY)){
-				    currentTheme = e.matches ? 'dark' : 'light';
-				    applyTheme(currentTheme);
-				  }
-				});
-				*/
-
-				fetch('pois.json')
-					.then(r => {
-						if (!r.ok) throw new Error('pois.json 読み込みエラー (' + r.status + ')');
-						return r.json();
-					})
-					.then(data => {
-						state.categories = data.categories || [];
-						state.pois = (data.pois || []).filter(p =>
-							p.spot && typeof p.spot.latitude === 'number' && typeof p.spot.longitude ===
-							'number'
-						);
-						state.categories.forEach(c => state.active.add(String(c.category_id)));
-						renderCategories();
-						renderMarkers();
-
-						const b = L.latLngBounds(state.pois.map(p => [p.spot.latitude, p.spot.longitude]));
-						if (b.isValid()) {
-							map.fitBounds(b, {
-								padding: [40, 40]
-							});
-							state.hasFitInitial = true;
-						}
-						document.getElementById('loading').style.display = 'none';
-
-						initGeoByPermission();
-					})
-					.catch(err => {
-						document.getElementById('loading').textContent = 'Error: ' + err.message;
-						console.error(err);
-					});
-
-				function openSettingModal() {
-
-					// PCなら表示しない
-					if (window.innerWidth >= 768) return;
-
-					const m = document.getElementById('settingModal');
-					if (!m) return;
-					m.classList.add('show');
-					m.setAttribute('aria-hidden', 'false');
 				}
 
-				function closeSettingModal() {
-					const m = document.getElementById('settingModal');
-					if (!m) return;
-					m.classList.remove('show');
-					m.setAttribute('aria-hidden', 'true');
+				if (recenter) {
+					map.setView(ll, Math.max(map.getZoom(), 15), {
+						animate: true
+					});
 				}
 
+				resolve(ll);
 
-				　　
-				document.getElementById('settingCancel')
-					.addEventListener('click', () => {
+			}, err => {
 
-						state.dismissedPermissionModal = true;
+				if (err && err.code === 1) {
 
-						closeSettingModal();
+					state.userDenied = true;
 
-					});
+					const guide = document.getElementById('locationGuide');
 
+					if (
+						guide &&
+						window.innerWidth < 768 &&
+						!state.guideDismissed
+					) {
+						guide.style.display = 'block';
+					}
 
-				document.getElementById('closeGuideBtn')
-.addEventListener('click', () => {
+					if (!state.dismissedPermissionModal) {
+						openSettingModal();
+					}
 
-    state.guideDismissed = true;
+					if (!silent) {
 
-    const guide = document.getElementById('locationGuide');
+						if (err && err.code === 1) {
 
-    if (guide) {
-        guide.style.display = 'none';
-
-        requestAnimationFrame(() => {
-            map.invalidateSize();
-        });
-    }
-
-});  
-
-						document.getElementById(
-							'settingGo').addEventListener('click', () => {
-							window.open(
-								'https://drop.machiapps.com/nakanoshima/location-permissions/',
-								'_blank', 'noopener,noreferrer');
-						});
-
-						document.getElementById('settingModal').addEventListener('click', (e) => {
-							if (e.target.id === 'settingModal') closeSettingModal();
-						});
-
-						function tryAutoLocate() {
-							locate({
-								silent: true,
-								recenter: true
-							}).then(ll => {
-								try {
-									const b = L.latLngBounds(state.pois.map(p => [p.spot.latitude, p.spot
-										.longitude
-									]));
-									if (b.isValid() && b.pad(0.5).contains(ll)) {
-										map.setView(ll, Math.max(15, map.getZoom()), {
-											animate: true
-										});
-									}
-								} catch (_) {}
-							}).catch(() => {});
-						}
-
-
-						function initGeoByPermission() {
-							if (!navigator.geolocation) return;
-
-							if (navigator.permissions && navigator.permissions.query) {
-
-								navigator.permissions.query({
-									name: 'geolocation'
-								}).then(res => {
-
-									state.geoPermission = res.state;
-
-									const guide = document.getElementById('locationGuide');
-
-									// 初回表示時
-									if (res.state === 'denied') {
-
-										state.userDenied = true;
-
-
-										if (guide && window.innerWidth < 768) {
-											guide.style.display = 'block';
-										}
-
-
-										if (!state.dismissedPermissionModal) {
-											openSettingModal();
-										}
-
-
-									} else {
-
-										state.userDenied = false;
-
-										if (guide && state.geoPermission === 'granted') {
-											guide.style.display = 'none';
-											requestAnimationFrame(() => {
-												map.invalidateSize();
-											});
-
-
-										}
-
-										tryAutoLocate();
-									}
-
-									// 権限変更監視
-									res.onchange = () => {
-
-										state.geoPermission = res.state;
-
-										if (res.state === 'denied') {
-
-											state.userDenied = true;
-
-
-											if (guide && window.innerWidth < 768) {
-												guide.style.display = 'block';
-											}
-
-
-											if (!state.dismissedPermissionModal) {
-												openSettingModal();
-											}
-
-										} else {
-
-											state.userDenied = false;
-
-											if (guide && state.geoPermission === 'granted') {
-												guide.style.display = 'none';
-
-
-												requestAnimationFrame(() => {
-													map.invalidateSize();
-												});
-
-											}
-
-											locate({
-												silent: true,
-												recenter: false
-											}).catch(() => {});
-										}
-									};
-
-								}).catch(() => {
-									tryAutoLocate();
-								});
-
-							} else {
-								tryAutoLocate();
+							if (!state.dismissedPermissionModal) {
+								openSettingModal();
 							}
+
+						} else if (err && err.code === 2) {
+
+							showToast('位置情報を取得できません');
+
+						} else if (err && err.code === 3) {
+
+							showToast('位置情報の取得がタイムアウトしました');
+
+						} else {
+
+							showToast('位置情報エラー');
+
 						}
 
-						document.addEventListener('visibilitychange', () => {
+					}
 
-    if (document.visibilityState !== 'visible') return;
+					reject(err);
 
-    if (!navigator.permissions || !navigator.permissions.query) return;
+				}
 
-    navigator.permissions.query({
-        name: 'geolocation'
-    }).then(res => {
+			}, {
+				enableHighAccuracy: true,
+				timeout: 10000,
+				maximumAge: 60000
+			});
 
-        state.geoPermission = res.state;
+		});
+	}
 
-        const guide = document.getElementById('locationGuide');
-
-        if (res.state === 'denied') {
-
-            state.userDenied = true;
-
-            if (
-                guide &&
-                window.innerWidth < 768 &&
-                !state.guideDismissed
-            ) {
-                guide.style.display = 'block';
-            }
-
-        } else {
-
-            state.userDenied = false;
-
-            if (guide) {
-                guide.style.display = 'none';
-            }
-
-            locate({
-                silent:true,
-                recenter:false
-            }).catch(() => {});
-
-        }
-
-    }).catch(() => {});
-
-});
+	function togglePanel(force) {
+		const panel = document.getElementById('panel');
+		const overlay = document.getElementById('overlay');
+		const btn = document.getElementById('toggleFilter');
+		const open = force !== undefined ? force : !panel.classList.contains(
+			'open');
+		panel.classList.toggle('open', open);
+		overlay.classList.toggle('show', open);
+		btn.classList.toggle('active', open);
+		panel.setAttribute('aria-hidden', String(!open));
+		setTimeout(() => map.invalidateSize(), 300);
+	}
 
 
-							if (!navigator.permissions || !navigator.permissions.query) return;
+	document.getElementById('locateBtn')
+		.addEventListener('click', () => {
 
-							navigator.permissions.query({
-								name: 'geolocation'
-							}).then(res => {
+			if (state.geoPermission !== 'granted') {
 
-								state.geoPermission = res.state;
+				openSettingModal();
 
-								const guide = document.getElementById('locationGuide');
+				return;
+			}
 
-								if (res.state === 'denied') {
+			locate();
 
-									state.userDenied = true;
+		});
 
-									if (guide && window.innerWidth < 768) {
-										guide.style.display = 'block';
-									}
+	document.getElementById('toggleFilter').addEventListener('click', () =>
+		togglePanel());
+	document.getElementById('overlay').addEventListener('click', () =>
+		togglePanel(false));
+	document.getElementById('themeBtn').addEventListener(
+		'click', () => {
+			currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+			localStorage.setItem(THEME_KEY, currentTheme);
+			applyTheme(currentTheme);
+		});
+	document.getElementById('selectAll').addEventListener('click', () => {
+		document.querySelectorAll('#catList input').forEach(cb => {
+			cb.checked = true;
+			state.active.add(cb.dataset.id);
+			cb.closest('.cat-item').classList.remove('off');
+		});
+		applyFilter();
+	});
+	document.getElementById('clearAll').addEventListener('click', () => {
+		document.querySelectorAll('#catList input').forEach(cb => {
+			cb.checked = false;
+			cb.closest('.cat-item').classList.add('off');
+		});
+		state.active.clear();
+		applyFilter();
+	});
 
-								} else {
+	// OS設定変更時の自動追従リスナーを無効化（デフォルト白固定のため）
+	/*
+	window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e=>{
+	  if (!localStorage.getItem(THEME_KEY)){
+	    currentTheme = e.matches ? 'dark' : 'light';
+	    applyTheme(currentTheme);
+	  }
+	});
+	*/
 
-									state.userDenied = false;
+	fetch('pois.json')
+		.then(r => {
+			if (!r.ok) throw new Error('pois.json 読み込みエラー (' + r.status + ')');
+			return r.json();
+		})
+		.then(data => {
+			state.categories = data.categories || [];
+			state.pois = (data.pois || []).filter(p =>
+				p.spot && typeof p.spot.latitude === 'number' && typeof p.spot.longitude ===
+				'number'
+			);
+			state.categories.forEach(c => state.active.add(String(c.category_id)));
+			renderCategories();
+			renderMarkers();
 
-									if (guide && state.geoPermission === 'granted') {
-										guide.style.display = 'none';
-									}
+			const b = L.latLngBounds(state.pois.map(p => [p.spot.latitude, p.spot.longitude]));
+			if (b.isValid()) {
+				map.fitBounds(b, {
+					padding: [40, 40]
+				});
+				state.hasFitInitial = true;
+			}
+			document.getElementById('loading').style.display = 'none';
 
-									locate({
-										silent: true,
-										recenter: false
-									}).catch(() => {});
-								}
+			initGeoByPermission();
+		})
+		.catch(err => {
+			document.getElementById('loading').textContent = 'Error: ' + err.message;
+			console.error(err);
+		});
 
-							}).catch(() => {});
+	function openSettingModal() {
+
+		// PCなら表示しない
+		if (window.innerWidth >= 768) return;
+
+		const m = document.getElementById('settingModal');
+		if (!m) return;
+		m.classList.add('show');
+		m.setAttribute('aria-hidden', 'false');
+	}
+
+	function closeSettingModal() {
+		const m = document.getElementById('settingModal');
+		if (!m) return;
+		m.classList.remove('show');
+		m.setAttribute('aria-hidden', 'true');
+	}
+
+
+	　　
+	document.getElementById('settingCancel')
+		.addEventListener('click', () => {
+
+			state.dismissedPermissionModal = true;
+
+			closeSettingModal();
+
+		});
+
+
+	document.getElementById('closeGuideBtn')
+		.addEventListener('click', () => {
+
+			state.guideDismissed = true;
+
+			const guide = document.getElementById('locationGuide');
+
+			if (guide) {
+				guide.style.display = 'none';
+
+				requestAnimationFrame(() => {
+					map.invalidateSize();
+				});
+			}
+
+		});
+
+	document.getElementById(
+		'settingGo').addEventListener('click', () => {
+		window.open(
+			'https://drop.machiapps.com/nakanoshima/location-permissions/',
+			'_blank', 'noopener,noreferrer');
+	});
+
+	document.getElementById('settingModal').addEventListener('click', (e) => {
+		if (e.target.id === 'settingModal') closeSettingModal();
+	});
+
+	function tryAutoLocate() {
+		locate({
+			silent: true,
+			recenter: true
+		}).then(ll => {
+			try {
+				const b = L.latLngBounds(state.pois.map(p => [p.spot.latitude, p.spot
+					.longitude
+				]));
+				if (b.isValid() && b.pad(0.5).contains(ll)) {
+					map.setView(ll, Math.max(15, map.getZoom()), {
+						animate: true
+					});
+				}
+			} catch (_) {}
+		}).catch(() => {});
+	}
+
+
+	function initGeoByPermission() {
+		if (!navigator.geolocation) return;
+
+		if (navigator.permissions && navigator.permissions.query) {
+
+			navigator.permissions.query({
+				name: 'geolocation'
+			}).then(res => {
+
+				state.geoPermission = res.state;
+
+				const guide = document.getElementById('locationGuide');
+
+				// 初回表示時
+				if (res.state === 'denied') {
+
+					state.userDenied = true;
+
+
+					if (guide && window.innerWidth < 768) {
+						guide.style.display = 'block';
+					}
+
+
+					if (!state.dismissedPermissionModal) {
+						openSettingModal();
+					}
+
+
+				} else {
+
+					state.userDenied = false;
+
+					if (guide && state.geoPermission === 'granted') {
+						guide.style.display = 'none';
+						requestAnimationFrame(() => {
+							map.invalidateSize();
 						});
-					})();
+
+
+					}
+
+					tryAutoLocate();
+				}
+
+				// 権限変更監視
+				res.onchange = () => {
+
+					state.geoPermission = res.state;
+
+					if (res.state === 'denied') {
+
+						state.userDenied = true;
+
+
+						if (guide && window.innerWidth < 768) {
+							guide.style.display = 'block';
+						}
+
+
+						if (!state.dismissedPermissionModal) {
+							openSettingModal();
+						}
+
+					} else {
+
+						state.userDenied = false;
+
+						if (guide && state.geoPermission === 'granted') {
+							guide.style.display = 'none';
+
+
+							requestAnimationFrame(() => {
+								map.invalidateSize();
+							});
+
+						}
+
+						locate({
+							silent: true,
+							recenter: false
+						}).catch(() => {});
+					}
+				};
+
+			}).catch(() => {
+				tryAutoLocate();
+			});
+
+		} else {
+			tryAutoLocate();
+		}
+	}
+
+	document.addEventListener('visibilitychange', () => {
+
+		if (document.visibilityState !== 'visible') return;
+
+		if (!navigator.permissions || !navigator.permissions.query) return;
+
+		navigator.permissions.query({
+			name: 'geolocation'
+		}).then(res => {
+
+			state.geoPermission = res.state;
+
+			const guide = document.getElementById('locationGuide');
+
+			if (res.state === 'denied') {
+
+				state.userDenied = true;
+
+				if (
+					guide &&
+					window.innerWidth < 768 &&
+					!state.guideDismissed
+				) {
+					guide.style.display = 'block';
+				}
+
+			} else {
+
+				state.userDenied = false;
+
+				if (guide) {
+					guide.style.display = 'none';
+				}
+
+				locate({
+					silent: true,
+					recenter: false
+				}).catch(() => {});
+
+			}
+
+		}).catch(() => {});
+
+	});
+
+
+	if (!navigator.permissions || !navigator.permissions.query) return;
+
+	navigator.permissions.query({
+		name: 'geolocation'
+	}).then(res => {
+
+		state.geoPermission = res.state;
+
+		const guide = document.getElementById('locationGuide');
+
+		if (res.state === 'denied') {
+
+			state.userDenied = true;
+
+			if (guide && window.innerWidth < 768) {
+				guide.style.display = 'block';
+			}
+
+		} else {
+
+			state.userDenied = false;
+
+			if (guide && state.geoPermission === 'granted') {
+				guide.style.display = 'none';
+			}
+
+			locate({
+				silent: true,
+				recenter: false
+			}).catch(() => {});
+		}
+
+	}).catch(() => {});
+	});
+	})();
 
 	</script>
 </body>
