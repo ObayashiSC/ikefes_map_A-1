@@ -1121,29 +1121,48 @@ document.getElementById('locateBtn')
 
 						document.addEventListener('visibilitychange', () => {
 
-							if (document.visibilityState !== 'visible') return;
+    if (document.visibilityState !== 'visible') return;
 
+    if (!navigator.permissions || !navigator.permissions.query) return;
 
-							setTimeout(() => {
-								locate({
-									silent: true,
-									recenter: false
-								}).catch(() => {});
-							}, 500);
+    navigator.permissions.query({
+        name: 'geolocation'
+    }).then(res => {
 
-							setTimeout(() => {
-								locate({
-									silent: true,
-									recenter: false
-								}).catch(() => {});
-							}, 1500);
+        state.geoPermission = res.state;
 
-							setTimeout(() => {
-								locate({
-									silent: true,
-									recenter: false
-								}).catch(() => {});
-							}, 3000);
+        const guide = document.getElementById('locationGuide');
+
+        if (res.state === 'denied') {
+
+            state.userDenied = true;
+
+            if (
+                guide &&
+                window.innerWidth < 768 &&
+                !state.guideDismissed
+            ) {
+                guide.style.display = 'block';
+            }
+
+        } else {
+
+            state.userDenied = false;
+
+            if (guide) {
+                guide.style.display = 'none';
+            }
+
+            locate({
+                silent:true,
+                recenter:false
+            }).catch(() => {});
+
+        }
+
+    }).catch(() => {});
+
+});
 
 
 							if (!navigator.permissions || !navigator.permissions.query) return;
