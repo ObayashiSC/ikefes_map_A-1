@@ -865,9 +865,21 @@ header{
 					setTimeout(() => map.invalidateSize(), 300);
 				}
 
-				document.getElementById('locateBtn').addEventListener('click', () => {
-					locate();
-				});
+				
+document.getElementById('locateBtn')
+.addEventListener('click', () => {
+
+    if (state.geoPermission !== 'granted') {
+
+        openSettingModal();
+
+        return;
+    }
+
+    locate();
+
+});
+
 				document.getElementById('toggleFilter').addEventListener('click', () =>
 					togglePanel());
 				document.getElementById('overlay').addEventListener('click', () =>
