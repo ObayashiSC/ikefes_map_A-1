@@ -795,32 +795,26 @@ header{
 
 				resolve(ll);
 
-			}, err => {
+		}, err => {
 
-				
-alert(
-        'code=' + err.code +
-        '\nmessage=' + err.message
-    );
+    state.userDenied = true;
 
+    const guide =
+        document.getElementById('locationGuide');
 
-				if (err && err.code === 1) {
+    if (
+        guide &&
+        window.innerWidth < 768 &&
+        !state.guideDismissed
+    ) {
+        guide.style.display = 'block';
+    }
 
-					state.userDenied = true;
+    openSettingModal();
 
-					const guide = document.getElementById('locationGuide');
+    reject(err);
 
-					if (
-						guide &&
-						window.innerWidth < 768 &&
-						!state.guideDismissed
-					) {
-						guide.style.display = 'block';
-					}
-
-					if (!state.dismissedPermissionModal) {
-						openSettingModal();
-					}
+},
 
 					if (!silent) {
 
@@ -969,14 +963,7 @@ document.getElementById('toggleFilter').addEventListener('click', () =>
 
 	　　
 	document.getElementById('settingCancel')
-		.addEventListener('click', () => {
-
-			state.dismissedPermissionModal = true;
-
-			closeSettingModal();
-
-		});
-
+		.addEventListener('click', closeSettingModal);
 
 	document.getElementById('closeGuideBtn')
 		.addEventListener('click', () => {
