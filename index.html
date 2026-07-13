@@ -863,24 +863,17 @@ header{
 		btn.classList.toggle('active', open);
 		panel.setAttribute('aria-hidden', String(!open));
 		setTimeout(() => map.invalidateSize(), 300);
-	}
+	}	
+document.getElementById('locateBtn')
+.addEventListener('click', () => {
 
+    locate({
+        silent: false,
+        recenter: true
+    });
 
-	document.getElementById('locateBtn')
-		.addEventListener('click', () => {
-
-			if (state.geoPermission !== 'granted') {
-
-				openSettingModal();
-
-				return;
-			}
-
-			locate();
-
-		});
-
-	document.getElementById('toggleFilter').addEventListener('click', () =>
+});
+document.getElementById('toggleFilter').addEventListener('click', () =>
 		togglePanel());
 	document.getElementById('overlay').addEventListener('click', () =>
 		togglePanel(false));
