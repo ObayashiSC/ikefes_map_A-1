@@ -797,6 +797,13 @@ header{
 
 			}, err => {
 
+				
+alert(
+        'code=' + err.code +
+        '\nmessage=' + err.message
+    );
+
+
 				if (err && err.code === 1) {
 
 					state.userDenied = true;
