@@ -398,6 +398,38 @@ header{
   text-decoration:underline;
   font-weight:500;
 }
+
+/* みんまちDROP 案内バー */
+.drop-guide{
+  flex-shrink:0;
+  background:var(--bg-2);
+  color:var(--ink-2);
+  border-bottom:1px solid var(--line);
+  text-align:center;
+  padding:9px 32px 9px 14px;
+  font-size:11.5px;
+  line-height:1.6;
+  position:relative;
+  z-index:900;
+}
+.drop-guide a{
+  color:#4da3ff;
+  text-decoration:underline;
+  font-weight:600;
+}
+.drop-guide .drop-close{
+  position:absolute;
+  right:8px;
+  top:7px;
+  border:none;
+  background:none;
+  color:var(--ink-3);
+  font-size:18px;
+  line-height:1;
+  cursor:pointer;
+  padding:0 4px;
+}
+.drop-guide .drop-close:hover{color:var(--ink);}
 	
 　　/* PCでは白帯を表示しない */
 　　
@@ -486,6 +518,10 @@ header{
 				</svg>
 			</button>
 		</header>
+		<div id="dropGuide" class="drop-guide">
+			<button id="closeDropBtn" class="drop-close" aria-label="閉じる">×</button>
+			建物の詳細は、みんまちDROPでご覧いただけます。<a href="https://drop.machiapps.com/collab/story/detail/?mood=ikefes-2026&amp;page=event" target="_blank" rel="noopener noreferrer">みんまちDROP</a>についてはこちらからご確認ください。
+		</div>
 		<div id="locationGuide" class="location-guide" style="display:none;">
 
 			<button id="closeGuideBtn" class="guide-close">
@@ -940,6 +976,16 @@ document.getElementById('toggleFilter').addEventListener('click', () =>
 	document.getElementById('settingCancel')
 		.addEventListener('click', closeSettingModal);
 
+	document.getElementById('closeDropBtn')
+		.addEventListener('click', () => {
+			const g = document.getElementById('dropGuide');
+			if (g) {
+				g.style.display = 'none';
+				requestAnimationFrame(() => {
+					map.invalidateSize();
+				});
+			}
+		});
 	document.getElementById('closeGuideBtn')
 		.addEventListener('click', () => {
 
