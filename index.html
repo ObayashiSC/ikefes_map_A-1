@@ -595,6 +595,7 @@ header{
 		currentTheme === 'dark' ? TILE_DARK : TILE_LIGHT, {
 			maxZoom: 20,
 			subdomains: 'abcd',
+			referrerPolicy: 'strict-origin-when-cross-origin',
 			attribution: '© <a href="https://www.openstreetmap.org/copyright">OSM</a> · © <a href="https://carto.com/attributions">CARTO</a>',
 		}).addTo(map);
 
