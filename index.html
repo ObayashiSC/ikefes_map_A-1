@@ -31,19 +31,6 @@
 	    --safe-top:env(safe-area-inset-top, 0px);
 	    --safe-bottom:env(safe-area-inset-bottom, 0px);
 	  }
-	  [data-theme="dark"]{
-	    --bg:#0e0e10;
-	    --bg-2:#161618;
-	    --ink:#f5f5f5;
-	    --ink-2:#c4c4c4;
-	    --ink-3:#8a8a8a;
-	    --line:#262628;
-	    --line-2:#1c1c1e;
-	    --hover:#1c1c1e;
-	    --shadow:0 8px 30px rgba(0,0,0,.6);
-	    --me-dot:#ffffff;
-	    --me-halo:rgba(255,255,255,.18);
-	  }
 	
 	  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 	  html,body{
@@ -201,9 +188,6 @@ header{
 	    font-size:9px !important; color:var(--ink-3) !important;
 	    font-family:var(--mono);
 	  }
-	  [data-theme="dark"] .leaflet-control-attribution{
-	    background:rgba(14,14,16,.85) !important;
-	  }
 	  .leaflet-control-attribution a{color:var(--ink-2) !important;}
 	
 	  .poi-marker{
@@ -244,7 +228,6 @@ header{
 	    width:100%; height:150px; object-fit:cover; display:block;
 	    background:var(--bg-2);
 	  }
-	  [data-theme="dark"] .pop-thumb{filter:brightness(.85);}
 	  .pop-body{padding:15px 16px 16px;}
 	  .pop-cat{
 	    display:flex; align-items:center; gap:8px; margin-bottom:8px;
@@ -454,25 +437,6 @@ header{
 				<line x1="2" y1="12" x2="5" y2="12" stroke="currentColor" stroke-width="1.3" />
 				<line x1="19" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.3" />
 			</symbol>
-			<symbol id="i-sun" viewBox="0 0 24 24">
-				<circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.3"
-				/>
-				<line x1="12" y1="2" x2="12" y2="5" stroke="currentColor" stroke-width="1.3" />
-				<line x1="12" y1="19" x2="12" y2="22" stroke="currentColor" stroke-width="1.3" />
-				<line x1="2" y1="12" x2="5" y2="12" stroke="currentColor" stroke-width="1.3" />
-				<line x1="19" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.3" />
-				<line x1="4.9" y1="4.9" x2="7" y2="7" stroke="currentColor" stroke-width="1.3" />
-				<line x1="17" y1="17" x2="19.1" y2="19.1" stroke="currentColor" stroke-width="1.3"
-				/>
-				<line x1="4.9" y1="19.1" x2="7" y2="17" stroke="currentColor" stroke-width="1.3"
-				/>
-				<line x1="17" y1="7" x2="19.1" y2="4.9" stroke="currentColor" stroke-width="1.3"
-				/>
-			</symbol>
-			<symbol id="i-moon" viewBox="0 0 24 24">
-				<path d="M20 14.5A8 8 0 1 1 9.5 4 a6.5 6.5 0 0 0 10.5 10.5z" fill="none" stroke="currentColor"
-				stroke-width="1.3" stroke-linejoin="round" />
-			</symbol>
 			<symbol id="i-arrow" viewBox="0 0 24 24">
 				<line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="1.4" />
 				<polyline points="14,6 20,12 14,18" fill="none" stroke="currentColor" stroke-width="1.4"
@@ -492,14 +456,8 @@ header{
 				<svg class="mark">
 					<use href="#i-logo" />
 				</svg>
-				<h1>OPEN HOUSE OSAKA 2026</h1>
-				<span class="sub">生きた建築ミュージアムフェスティバル大阪2025</span>
+				<h1>イケフェス大阪2026</h1>
 			</div>
-			<button class="icon-btn" id="themeBtn" title="表示切替" aria-label="テーマ切替">
-				<svg id="themeIcon">
-					<use href="#i-moon" />
-				</svg>
-			</button>
 			<button class="icon-btn" id="toggleFilter" title="カテゴリ" aria-label="カテゴリ">
 				<svg>
 					<use href="#i-menu" />
@@ -539,7 +497,7 @@ header{
 			</div>
 			<div class="panel-section">
 				<div class="panel-label">About</div>
-				<div class="about">まちに点在する建築・展示・空間を歩いて巡るためのマップ。 地図はグレースケールに抑え、建築そのものに目が向くようにデザインしました。 </div>
+				<div class="about">みんまちDROPは、まちを巡りながら見つけた魅力や体験を、写真と言葉で共有するアプリです。 イケフェスの建物を巡りながら、あなたが見つけた建築の魅力やまちの楽しさ、心に残った発見を投稿してみましょう！ </div>
 			</div>
 		</aside>
 		<div id="overlay"></div>
@@ -573,16 +531,9 @@ header{
 	const THEME_KEY = 'arc-map-theme';
 	const TILE_LIGHT =
 		'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-	const TILE_DARK =
-		'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
-	function getInitialTheme() {
-		const saved = localStorage.getItem(THEME_KEY);
-		if (saved) return saved;
-		// デフォルトを白ベース（light）に固定
-		return 'light';
-	}
-	let currentTheme = getInitialTheme();
+	// ダークモードは廃止し、白ベース（light）に固定
+	let currentTheme = 'light';
 
 	const map = L.map('map', {
 		zoomControl: true,
@@ -592,7 +543,7 @@ header{
 	}).setView([34.6937, 135.5023], 14);
 
 	const tileLayer = L.tileLayer(
-		currentTheme === 'dark' ? TILE_DARK : TILE_LIGHT, {
+		TILE_LIGHT, {
 			maxZoom: 20,
 			subdomains: 'abcd',
 			referrerPolicy: 'strict-origin-when-cross-origin',
@@ -601,12 +552,8 @@ header{
 
 	function applyTheme(t) {
 		document.documentElement.setAttribute('data-theme', t);
-		document.getElementById('themeIcon').innerHTML =
-			'<use href="' + (t === 'dark' ? '#i-sun' : '#i-moon') + '"/>';
-		document.getElementById('themeColorMeta').setAttribute(
-			'content', t === 'dark' ? '#0e0e10' : '#ffffff'
-		);
-		tileLayer.setUrl(t === 'dark' ? TILE_DARK : TILE_LIGHT);
+		document.getElementById('themeColorMeta').setAttribute('content', '#ffffff');
+		tileLayer.setUrl(TILE_LIGHT);
 	}
 	applyTheme(currentTheme);
 
@@ -877,12 +824,6 @@ document.getElementById('toggleFilter').addEventListener('click', () =>
 		togglePanel());
 	document.getElementById('overlay').addEventListener('click', () =>
 		togglePanel(false));
-	document.getElementById('themeBtn').addEventListener(
-		'click', () => {
-			currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-			localStorage.setItem(THEME_KEY, currentTheme);
-			applyTheme(currentTheme);
-		});
 	document.getElementById('selectAll').addEventListener('click', () => {
 		document.querySelectorAll('#catList input').forEach(cb => {
 			cb.checked = true;
@@ -900,15 +841,6 @@ document.getElementById('toggleFilter').addEventListener('click', () =>
 		applyFilter();
 	});
 
-	// OS設定変更時の自動追従リスナーを無効化（デフォルト白固定のため）
-	/*
-	window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e=>{
-	  if (!localStorage.getItem(THEME_KEY)){
-	    currentTheme = e.matches ? 'dark' : 'light';
-	    applyTheme(currentTheme);
-	  }
-	});
-	*/
 
 	fetch('pois.json')
 		.then(r => {
