@@ -3,6 +3,14 @@
 
 <head>
 	<meta charset="UTF-8">
+	<!-- Google tag (gtag.js) -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-B2TS0WLRZK"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'G-B2TS0WLRZK');
+	</script>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
 	<meta name="theme-color" content="#ffffff" id="themeColorMeta">
 	<title>イケフェス大阪2026 MAP</title>
@@ -683,6 +691,37 @@ header{
 					minWidth: 270,
 					closeButton: true
 				});
+			// ピン押下時にGAへイベントを記録
+			m.on('click', () => {
+				if (typeof gtag === 'function') {
+					gtag('event', 'pin_click', {
+						event_id: poi.event_id,
+						event_name: poi.event_name || '',
+						category_name: (poi.category && poi.category.category_name) || '',
+						category_id: (poi.category && poi.category.category_id) || ''
+					});
+				}
+			});
+			// ポップアップ内「Read more」押下時にGAへイベントを記録
+			m.on('popupopen', (e) => {
+				const link = e.popup.getElement() &&
+					e.popup.getElement().querySelector('.pop-link');
+				if (link) {
+					link.addEventListener('click', () => {
+						if (typeof gtag === 'function') {
+							gtag('event', 'read_more_click', {
+								event_id: poi.event_id,
+								event_name: poi.event_name || '',
+								category_name: (poi.category && poi.category.category_name) || '',
+								category_id: (poi.category && poi.category.category_id) || '',
+								link_url: poi.detail_url || ''
+							});
+						}
+					}, {
+						once: true
+					});
+				}
+			});
 			state.markers.set(poi.event_id, {
 				marker: m,
 				poi
