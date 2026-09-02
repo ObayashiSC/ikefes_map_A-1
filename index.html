@@ -537,8 +537,10 @@ header{
 	<script>
 	(() => {
 	const THEME_KEY = 'arc-map-theme';
+	// CARTO Basemaps はAPIキーが必須になりました。キーは ?key= でタイルURLに付与します。
+	const CARTO_API_KEY = 'cb1_2rcy_1_3673d2ee2e8b7013c29c99aa';
 	const TILE_LIGHT =
-		'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+		'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=' + CARTO_API_KEY;
 
 	// ダークモードは廃止し、白ベース（light）に固定
 	let currentTheme = 'light';
