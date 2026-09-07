@@ -183,14 +183,8 @@
     MapAPI.showMarker(ref);
     MapAPI.setView(poi.spot.latitude, poi.spot.longitude, Math.max(MapAPI.getZoom(), 17), { animate: true });
 
-    // 遷移時はサイドパネル（説明）も同時に開く
-    togglePanel(true);
-
-    // パネルが左側にかぶってピンが隠れないよう、右側の見える位置へずらしてから開く
+    // 遷移時はピンのポップアップのみ開く（サイドパネル＝カテゴリIndexは開かない）
     setTimeout(() => {
-      const panel = document.getElementById('panel');
-      const panelW = (panel && panel.classList.contains('open')) ? panel.offsetWidth : 0;
-      if (panelW > 0) MapAPI.panBy(-panelW / 2, 0);
       MapAPI.openPopup(ref);
     }, 380);
   }
