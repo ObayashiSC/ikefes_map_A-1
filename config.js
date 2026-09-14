@@ -18,11 +18,42 @@ window.APP_CONFIG = {
 
   // Google Maps JavaScript API のキー（Google Cloud で発行）
   // ※未設定のままだと Google 版は地図が表示されません
-  GOOGLE_MAPS_API_KEY: 'YOUR_GOOGLE_MAPS_API_KEY',
+  GOOGLE_MAPS_API_KEY: 'AIzaSyAFpPT5t7YU9WLD7FhTgqaVokdE8A5cu-w',
 
   // 初期表示（中心・ズーム）※両プロバイダ共通
   INITIAL_CENTER: { lat: 34.6937, lng: 135.5023 },
-  INITIAL_ZOOM: 14
+  INITIAL_ZOOM: 14,
+
+  /* =======================================================================
+   * カテゴリの一本化（サイドパネルのカテゴリ＝「建築」1件だけにする）
+   * -----------------------------------------------------------------------
+   * true  … pois.json のエリア別カテゴリを無視し、全POIを下記1カテゴリに寄せる
+   *         （ピンの色も COLOR で統一される）
+   * false … pois.json のカテゴリ定義をそのまま使う（元の挙動）
+   * ======================================================================= */
+  SINGLE_CATEGORY: {
+    ENABLED: true,
+    ID: 'MC01000001',
+    NAME: '建築',
+    COLOR: '#F44336'   // ← 建築の色。変えたい場合はこの1行だけ変更
+  },
+
+  /* =======================================================================
+   * 画像パスの付け替え
+   * -----------------------------------------------------------------------
+   * pois.json の thumbnail_url は "/collab/upload/assets/images/event/xxx.jpg"
+   * のようにドメイン直下からの絶対パスになっている。
+   * GitHub Pages 等ではそのままだと 404 になるため、ファイル名だけを取り出して
+   * IMAGE_BASE 配下を参照するよう app.js 側で自動変換する。
+   *
+   * 例）IMAGE_BASE:'images/event/' の場合
+   *     /collab/upload/assets/images/event/EV01010001_01_s.jpg
+   *       → images/event/EV01010001_01_s.jpg
+   *
+   * ※ REWRITE を false にすると pois.json の値をそのまま使う
+   * ======================================================================= */
+  IMAGE_REWRITE: true,
+  IMAGE_BASE: 'images/event/'
 };
 
 /* URLの ?map= があれば優先（テスト用） */

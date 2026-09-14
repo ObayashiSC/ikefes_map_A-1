@@ -49,11 +49,44 @@
       '</svg>';
   }
 
+  /* 画像パスの解決
+   * pois.json の thumbnail_url はドメイン直下からの絶対パス
+   *   例: /collab/upload/assets/images/event/EV01010001_01_s.jpg
+   * これをファイル名だけ取り出して CFG.IMAGE_BASE 配下（例: images/event/）に付け替える。
+   * http(s):// で始まる外部URLはそのまま使用。 */
+  function resolveImageUrl(url) {
+    if (!url) return '';
+    const s = String(url).trim();
+    if (/^(https?:)?\/\//i.test(s) || /^data:/i.test(s)) return s;
+    if (CFG.IMAGE_REWRITE === false) return s;
+    const base = CFG.IMAGE_BASE || 'images/event/';
+    const file = s.split('?')[0].split('#')[0].split('/').pop();
+    if (!file) return s;
+    return base.replace(/\/?$/, '/') + file;
+  }
+
+  /* カテゴリ一本化（config.js の SINGLE_CATEGORY.ENABLED === true のとき）
+   * pois.json のエリア別カテゴリを無視し、全POIを「建築」1カテゴリに寄せる。
+   * ピンの色・凡例スウォッチ・ポップアップのドットも同色になる。 */
+  function applySingleCategory(data) {
+    const sc = CFG.SINGLE_CATEGORY;
+    if (!sc || !sc.ENABLED) return data;
+    const cat = {
+      category_id: sc.ID || 'MC_ARCH',
+      category_name: sc.NAME || '建築',
+      color_code: sc.COLOR || '#F44336'
+    };
+    data.categories = [cat];
+    (data.pois || []).forEach(p => { p.category = Object.assign({}, cat); });
+    return data;
+  }
+
   function popupHtml(poi) {
     const cat = poi.category || {};
     const color = cat.color_code || '#999';
-    const thumb = poi.thumbnail_url ?
-      `<img class="pop-thumb" src="${escapeHtml(poi.thumbnail_url)}" onerror="this.style.display='none';">` : '';
+    const thumbSrc = resolveImageUrl(poi.thumbnail_url);
+    const thumb = thumbSrc ?
+      `<img class="pop-thumb" src="${escapeHtml(thumbSrc)}" onerror="this.style.display='none';">` : '';
     const link = poi.detail_url ?
       '<a class="pop-link" href="' + escapeHtml(poi.detail_url) +
       '" target="_blank" rel="noopener">Read more <svg><use href="#i-arrow"/></svg></a>' : '';
@@ -70,7 +103,7 @@
   }
 
   // アダプタから呼ばれる共有ヘルパを公開（ピン形状を両版で一致させる）
-  window.MapShared = { pinSvg, popupHtml, escapeHtml };
+  window.MapShared = { pinSvg, popupHtml, escapeHtml, resolveImageUrl };
 
   /* ---------- GA イベント（両版共通） ---------- */
   function gaPinClick(poi) {
@@ -360,6 +393,7 @@
     fetch('pois.json')
       .then(r => { if (!r.ok) throw new Error('pois.json 読み込みエラー (' + r.status + ')'); return r.json(); })
       .then(data => {
+        data = applySingleCategory(data);
         state.categories = data.categories || [];
         state.pois = (data.pois || []).filter(p =>
           p.spot && typeof p.spot.latitude === 'number' && typeof p.spot.longitude === 'number');
