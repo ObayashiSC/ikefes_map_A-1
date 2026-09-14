@@ -38,7 +38,7 @@
       window[cbName] = () => { resolve(); try { delete window[cbName]; } catch (e) {} };
       const s = document.createElement('script');
       s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) +
-        '&callback=' + cbName + '&language=ja&region=JP';
+        '&loading=async&callback=' + cbName + '&language=ja&region=JP';
       s.async = true; s.defer = true;
       s.onerror = () => reject(new Error('Google Maps スクリプトの読み込みに失敗'));
       document.head.appendChild(s);
