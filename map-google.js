@@ -64,6 +64,59 @@
     };
   }
 
+  /* =======================================================================
+   * InfoWindow 自動フィット
+   * -----------------------------------------------------------------------
+   * Google は InfoWindow の max-height を控えめに設定するため、タイトルが
+   * 2行になると住所行が下で切れてしまう。
+   * 「使える高さ」を地図から算出し、住所行の下端までが収まるように
+   * サムネイル画像の高さを逆算して縮める（タイトルは常に全行表示）。
+   * ======================================================================= */
+  function fitInfoWindow() {
+    const d = document.querySelector('.gm-style-iw-d');
+    if (!d || !map || !map.getDiv()) return;
+
+    const mapH = map.getDiv().offsetHeight || 0;
+    if (!mapH) return;
+
+    // 地図の高さに対して InfoWindow が使える実用高さ（上下UI分を差し引く）
+    const usable = Math.max(240, Math.round(mapH * 0.74));
+    d.style.maxHeight = usable + 'px';
+    const c = d.closest('.gm-style-iw-c');
+    if (c) c.style.maxHeight = (usable + 20) + 'px';
+
+    const pop   = d.querySelector('.pop');
+    const thumb = d.querySelector('.pop-thumb');
+    // 住所が無いPOIはタイトルまでを基準にする
+    const anchor = d.querySelector('.pop-addr') || d.querySelector('.pop-title');
+    if (!pop || !anchor) return;
+
+    const DEFAULT_H = 118;   // 画像の既定の高さ
+    const MIN_H     = 64;    // これ以上は縮めない下限
+    const MARGIN    = 8;     // 下端の余裕
+
+    // 前回の値が残らないよう、まず既定値に戻してから実測する
+    if (thumb) thumb.style.display = '';
+    pop.style.setProperty('--pop-thumb-h', DEFAULT_H + 'px');
+
+    // 「popの先頭」から「住所行の下端」までに必要な高さ
+    const popTop = pop.getBoundingClientRect().top;
+    const needed = anchor.getBoundingClientRect().bottom - popTop + MARGIN;
+
+    if (needed > usable) {
+      const newH = Math.max(MIN_H, DEFAULT_H - (needed - usable));
+      pop.style.setProperty('--pop-thumb-h', newH + 'px');
+      // 下限まで縮めても足りない長いタイトルは、画像より住所を優先する
+      if (newH <= MIN_H && thumb) {
+        const still = anchor.getBoundingClientRect().bottom - popTop + MARGIN;
+        if (still > usable) thumb.style.display = 'none';
+      }
+    }
+
+    // 開いた直後は必ず先頭から表示
+    d.scrollTop = 0;
+  }
+
   const Adapter = {
     init({ containerId, center, zoom }) {
       return loadGoogleMaps().then(() => {
@@ -112,6 +165,9 @@
       currentOpenPopupHandler = google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
         const container = document.querySelector('.gm-style-iw-d') || document.querySelector('.gm-style-iw');
         if (ref._onPopupOpen && container) ref._onPopupOpen(container);
+
+        /* InfoWindow 自動フィット：住所行まで必ず見えるように調整する */
+        try { fitInfoWindow(); } catch (e) {}
       });
       infoWindow.open({ map, anchor: ref });
     },

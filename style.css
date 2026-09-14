@@ -271,6 +271,24 @@ header{
      指が止まって見えるため、こちらでは解除する。 */
   .gm-style .pop-desc{max-height:none; overflow:visible;}
   .gm-style .pop{width:270px;}
+  /* InfoWindow は「地図の高さ」から使える高さが決まるため、サムネイルが高いと
+     カテゴリ・タイトル・住所が入りきらない。タイトルが2行になる施設も多いので、
+     高さは map-google.js 側で実測して画像を自動で縮める（--pop-thumb-h）。
+     ここでは既定値と下限だけ決めておく。 */
+  .gm-style .pop-thumb{
+    height:var(--pop-thumb-h, 118px);
+    min-height:64px;
+  }
+  .gm-style .pop-body{padding:12px 16px 16px;}
+  /* タイトルは省略せず必要なだけ折り返す（2行でも3行でも全部出す） */
+  .gm-style .pop-title{
+    font-size:18px; margin-bottom:5px;
+    overflow:visible; display:block; overflow-wrap:anywhere;
+  }
+  .gm-style .pop-addr{
+    margin-bottom:9px; padding-bottom:9px;
+    overflow:visible; white-space:normal;
+  }
   .gm-style .gm-ui-hover-effect{top:2px !important; right:2px !important;}
   .gmap-pin{
     width:30px; height:38px; transform:translate(-50%,-100%);
