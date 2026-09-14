@@ -231,16 +231,40 @@ header{
   }
   /* Google の InfoWindow は中身が地図の高さを超えると、この要素に
      インラインで overflow:auto / max-height を付けてスクロールさせる。
-     ここで overflow:hidden を当てるとスクロール不能になるため auto にする。
-     （スクロールバーは見た目のために非表示にするが、操作は可能） */
+     ここで overflow:hidden を当てるとスクロール不能になるため auto にする。 */
   .gm-style .gm-style-iw-d{
     overflow:auto !important;
     -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;              /* Firefox */
-    -ms-overflow-style:none;           /* 旧Edge/IE */
     overscroll-behavior:contain;       /* 端まで行っても地図側に伝播させない */
+    /* --- スクロールバーを常時表示する（Firefox / 旧Edge） --- */
+    scrollbar-width:thin;
+    scrollbar-color:#9e9e9e transparent;
+    -ms-overflow-style:auto;
   }
-  .gm-style .gm-style-iw-d::-webkit-scrollbar{width:0; height:0;}
+  /* --- スクロールバーの見た目（Chrome / Edge / Safari） ---
+     幅・色を変えたい場合はこのブロックだけ調整してください。 */
+  .gm-style .gm-style-iw-d::-webkit-scrollbar{
+    width:8px; height:8px;
+    -webkit-appearance:none;
+  }
+  .gm-style .gm-style-iw-d::-webkit-scrollbar-track{
+    background:transparent;
+  }
+  .gm-style .gm-style-iw-d::-webkit-scrollbar-thumb{
+    background:#9e9e9e;                /* つまみの色 */
+    border-radius:4px;
+    border:2px solid var(--bg);        /* 左右に余白を作って細く見せる */
+    background-clip:padding-box;
+    min-height:40px;
+  }
+  .gm-style .gm-style-iw-d::-webkit-scrollbar-thumb:hover{
+    background:#6f6f6f;
+    background-clip:padding-box;
+  }
+  /* スマホ等で自動的に消えるのを防ぎ、常に出しておく */
+  .gm-style .gm-style-iw-d::-webkit-scrollbar-thumb{
+    -webkit-box-shadow:none;
+  }
   .gm-style .gm-style-iw-t::after{background:var(--bg) !important;}
   /* Google版では InfoWindow 全体を1つのスクロール領域にする。
      説明文側の入れ子スクロール（.pop-desc）は二重スクロールになり
