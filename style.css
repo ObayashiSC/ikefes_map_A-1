@@ -229,8 +229,24 @@ header{
     box-shadow:var(--shadow) !important; border:1px solid var(--line);
     background:var(--bg) !important;
   }
-  .gm-style .gm-style-iw-d{overflow:hidden !important;}
+  /* Google の InfoWindow は中身が地図の高さを超えると、この要素に
+     インラインで overflow:auto / max-height を付けてスクロールさせる。
+     ここで overflow:hidden を当てるとスクロール不能になるため auto にする。
+     （スクロールバーは見た目のために非表示にするが、操作は可能） */
+  .gm-style .gm-style-iw-d{
+    overflow:auto !important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;              /* Firefox */
+    -ms-overflow-style:none;           /* 旧Edge/IE */
+    overscroll-behavior:contain;       /* 端まで行っても地図側に伝播させない */
+  }
+  .gm-style .gm-style-iw-d::-webkit-scrollbar{width:0; height:0;}
   .gm-style .gm-style-iw-t::after{background:var(--bg) !important;}
+  /* Google版では InfoWindow 全体を1つのスクロール領域にする。
+     説明文側の入れ子スクロール（.pop-desc）は二重スクロールになり
+     指が止まって見えるため、こちらでは解除する。 */
+  .gm-style .pop-desc{max-height:none; overflow:visible;}
+  .gm-style .pop{width:270px;}
   .gm-style .gm-ui-hover-effect{top:2px !important; right:2px !important;}
   .gmap-pin{
     width:30px; height:38px; transform:translate(-50%,-100%);
