@@ -52,7 +52,7 @@ window.APP_CONFIG = {
    *
    * ※ REWRITE を false にすると pois.json の値をそのまま使う
    * ======================================================================= */
-  IMAGE_REWRITE: true,
+  IMAGE_REWRITE: false,
   IMAGE_BASE: 'images/event/'
 };
 
