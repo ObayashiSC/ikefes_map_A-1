@@ -43,8 +43,16 @@ header{
   align-items:center;
   gap:8px;
 }
-  .brand{display:flex; align-items:center; gap:9px; flex:1; min-width:0;}
-  .brand .mark{ width:20px; height:20px; flex-shrink:0; color:var(--ink); }
+  /* アイコンはタイトル行に揃える（2行目の案内文には影響させない） */
+  .brand{display:flex; align-items:flex-start; gap:9px; flex:1; min-width:0;}
+  .brand .mark{
+    /* i-logo は viewBox 24 のうち家の実描画が約18/24。
+       タイトル(19px)と見た目の高さを合わせるため 24px に拡大し、
+       タイトル行の中央に来るよう上下を微調整する。 */
+    width:24px; height:24px; flex-shrink:0; color:var(--ink);
+    align-self:flex-start;
+    margin-top:-2px;
+  }
   .brand-text{display:flex; flex-direction:column; gap:2px; min-width:0;}
   /* タイトル下のみんまちDROP案内（旧 .drop-guide の白帯をヘッダー内に移設） */
   .brand-note{
@@ -73,6 +81,7 @@ header{
   @media (max-width:540px){
     .brand .sub{display:none;}
     .brand h1{font-size:17px;}
+    .brand .mark{width:22px; height:22px; margin-top:-2px;}
   }
   .icon-btn{
     background:transparent; border:1px solid var(--line);
