@@ -43,8 +43,21 @@ header{
   align-items:center;
   gap:8px;
 }
-  .brand{display:flex; align-items:baseline; gap:9px; flex:1; min-width:0;}
+  .brand{display:flex; align-items:center; gap:9px; flex:1; min-width:0;}
   .brand .mark{ width:20px; height:20px; flex-shrink:0; color:var(--ink); }
+  .brand-text{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  /* タイトル下のみんまちDROP案内（旧 .drop-guide の白帯をヘッダー内に移設） */
+  .brand-note{
+    margin:0;
+    font-size:11px; line-height:1.5; color:var(--ink);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .brand-note a{
+    color:#4da3ff; text-decoration:underline; font-weight:500; white-space:nowrap;
+  }
+  @media (max-width:400px){
+    .brand-note{font-size:10px;}
+  }
   .brand h1{
     font-family:var(--serif); font-weight:500;
     font-size:19px; letter-spacing:.04em; margin:0;
@@ -406,25 +419,6 @@ header{
   color:#4da3ff;
   text-decoration:underline;
   font-weight:500;
-}
-/* みんまちDROP 案内バー（location-guideと同じ配色・フォントに統一） */
-.drop-guide{
-  flex-shrink:0;
-  background:var(--bg);
-  color:var(--ink);
-  border-bottom:1px solid var(--line);
-  text-align:center;
-  padding:8px 12px;
-  font-size:11px;
-  line-height:1.5;
-  position:relative;
-  z-index:900;
-}
-.drop-guide a{
-  color:#4da3ff;
-  text-decoration:underline;
-  font-weight:500;
-  white-space:nowrap;
 }
 　　/* PCでは白帯を表示しない */　　
 @media screen and (min-width:768px){

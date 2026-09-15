@@ -62,16 +62,17 @@
 		<header>
 			<div class="brand">
 				<svg class="mark"><use href="#i-logo" /></svg>
-				<h1>イケフェス大阪2026</h1>
+				<div class="brand-text">
+					<h1>イケフェス大阪2026</h1>
+					<p class="brand-note"><a
+							href="https://drop.machiapps.com/collab/story/detail/?mood=ikefes-2026&amp;page=event"
+							target="_blank" rel="noopener noreferrer">みんまちDROP</a>については、こちらをご確認ください。</p>
+				</div>
 			</div>
 			<button class="icon-btn" id="toggleFilter" title="カテゴリ" aria-label="カテゴリ">
 				<svg><use href="#i-menu" /></svg>
 			</button>
 		</header>
-
-		<div id="dropGuide" class="drop-guide">
-			建物の詳細は、みんまちDROPでご覧いただけます。<br><a href="https://drop.machiapps.com/collab/story/detail/?mood=ikefes-2026&amp;page=event" target="_blank" rel="noopener noreferrer">みんまちDROP</a>についてはこちらからご確認ください。
-		</div>
 
 		<div id="locationGuide" class="location-guide" style="display:none;">
 			<button id="closeGuideBtn" class="guide-close">×</button>
@@ -132,7 +133,7 @@
 	<!-- ▼ 地図アダプタ（config の指定に応じて片方だけが有効化される） -->
 	<script src="map-carto.js"></script>
 	<script src="map-google.js"></script>
-	<!-- ▼ 共通ロジック（両版共有） -->v
+	<!-- ▼ 共通ロジック（両版共有） -->
 	<script src="app.js"></script>
 </body>
 </html>
