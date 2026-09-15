@@ -274,17 +274,27 @@
   }
 
   /* ---------- 位置情報許可モーダル ---------- */
+  /* 閉じるときに aria-hidden="true" を付けると、モーダル内のボタン
+   * （キャンセル等）にフォーカスが残ったままになり、ブラウザが
+   * "Blocked aria-hidden on an element because its descendant retained focus"
+   * を警告する。
+   * → 閉じる前にフォーカスを外し、非表示中は inert（フォーカス不可）にする。 */
   function openSettingModal() {
     if (window.innerWidth >= 768) return; // PCなら表示しない
     const m = document.getElementById('settingModal');
     if (!m) return;
+    m.removeAttribute('inert');
     m.classList.add('show');
     m.setAttribute('aria-hidden', 'false');
   }
   function closeSettingModal() {
     const m = document.getElementById('settingModal');
     if (!m) return;
+    // モーダル内にフォーカスが残っていれば先に外す
+    const ae = document.activeElement;
+    if (ae && m.contains(ae) && typeof ae.blur === 'function') ae.blur();
     m.classList.remove('show');
+    m.setAttribute('inert', '');      // 非表示中はフォーカスが入らないようにする
     m.setAttribute('aria-hidden', 'true');
   }
 
