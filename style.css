@@ -154,6 +154,14 @@ header{
   .cat-item.off .cat-name, .cat-item.off .cat-num{opacity:.4;}
   .cat-item.off .cat-swatch{opacity:.3;}
   .about{font-size:11px; color:var(--ink-3); line-height:1.75;}
+  /* About 見出し「みんまちDROPとは」＋本文（見出しの後は1行あける） */
+  .about-title{
+    display:block;
+    font-size:12px; font-weight:600; color:var(--ink);
+    letter-spacing:.02em; margin-bottom:1.75em;
+  }
+  .about p{margin:0;}
+  .about p + p{margin-top:.6em;}
 
 #map{
   flex:1;

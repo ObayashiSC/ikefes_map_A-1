@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
 	<meta charset="UTF-8">
 	<!-- Google tag (gtag.js) -->
@@ -26,6 +27,7 @@
 	<!-- 共通スタイル（外だし） -->
 	<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 	<svg width="0" height="0" style="position:absolute" aria-hidden="true">
 		<defs>
@@ -94,7 +96,11 @@
 			</div>
 			<div class="panel-section">
 				<div class="panel-label">About</div>
-				<div class="about">みんまちDROPは、まちを巡りながら見つけた魅力や体験を、写真と言葉で共有するアプリです。 イケフェスの建物を巡りながら、あなたが見つけた建築の魅力やまちの楽しさ、心に残った発見を投稿してみましょう！ </div>
+				<div class="about">
+					<strong class="about-title">みんまちDROPとは</strong>
+					<p>みんまちDROPは、まち歩きで見つけた魅力や体験を、写真とコメントで共有できるアプリです。</p>
+					<p>イケフェスの建物を巡りながら、心に残った建築やまちの風景、発見したことを投稿して、みんなでまちの魅力を共有しましょう。</p>
+				</div>
 			</div>
 		</aside>
 
@@ -130,10 +136,13 @@
 
 	<!-- ▼ 設定（MAP_PROVIDER の切替はここ） -->
 	<script src="config.js"></script>
+
 	<!-- ▼ 地図アダプタ（config の指定に応じて片方だけが有効化される） -->
 	<script src="map-carto.js"></script>
 	<script src="map-google.js"></script>
+
 	<!-- ▼ 共通ロジック（両版共有） -->
 	<script src="app.js"></script>
 </body>
+
 </html>
